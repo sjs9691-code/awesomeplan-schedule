@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AWESOMEPLAN - 광고 스케줄 관리</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -782,6 +784,19 @@ input,select,textarea{font-family:inherit}
 </div>
 
 <script>
+// ============ FIREBASE ============
+const firebaseConfig={
+  apiKey:"AIzaSyDnNwcYScZ-i_rm90xvnOoJP71o5547-WE",
+  authDomain:"awesomeplan-schedule.firebaseapp.com",
+  databaseURL:"https://awesomeplan-schedule-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"awesomeplan-schedule",
+  storageBucket:"awesomeplan-schedule.firebasestorage.app",
+  messagingSenderId:"25520261076",
+  appId:"1:25520261076:web:08a55e8a28e492c0163841"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
+
 // ============ CONFIG ============
 let STORES={};
 const DEFAULT_STORES={
@@ -793,8 +808,8 @@ const DEFAULT_STORES={
   dudungtan:{name:'두둥탄 용산점',color:'#60a5fa',short:'두둥탄'},
   yongsanpogu:{name:'용산포구',color:'#34d399',short:'용산포구'}
 };
-function loadStores(){const s=localStorage.getItem('ap_stores');if(s){STORES=JSON.parse(s)}else{STORES={...DEFAULT_STORES};saveStores()}}
-function saveStores(){localStorage.setItem('ap_stores',JSON.stringify(STORES))}
+function loadStores(){STORES={...DEFAULT_STORES}}
+function saveStores(){db.ref('stores').set(STORES)}
 const PLATS={instagram:{n:'IG Reels',f:'Instagram Reels'},youtube:{n:'YT Shorts',f:'YouTube Shorts'},tiktok:{n:'TikTok',f:'TikTok'},twitter:{n:'X/Twitter',f:'Twitter/X'},naver:{n:'Naver',f:'Naver Blog'},facebook:{n:'Facebook',f:'Facebook'}};
 const STAT={scheduled:'예정',progress:'진행중',done:'완료',review:'검토중',cancelled:'취소'};
 const DN=['일','월','화','수','목','금','토'];
@@ -826,21 +841,63 @@ function changePw(){
   const a=document.getElementById('newPw').value,b=document.getElementById('newPw2').value;
   if(!a){alert('비밀번호를 입력하세요.');return}
   if(a!==b){alert('비밀번호가 일치하지 않습니다.');return}
-  localStorage.setItem('ap_pw',a);alert('비밀번호가 변경되었습니다.');
+  localStorage.setItem('ap_pw',a);db.ref('settings/password').set(a);alert('비밀번호가 변경되었습니다.');
   document.getElementById('newPw').value='';document.getElementById('newPw2').value='';
 }
 
-// ============ STORAGE ============
-function save(){localStorage.setItem('ap_data',JSON.stringify(data))}
-function saveInfs(){localStorage.setItem('ap_infs',JSON.stringify(influencers))}
-function saveBgts(){localStorage.setItem('ap_bgts',JSON.stringify(budgets))}
+// ============ STORAGE (Firebase) ============
+function save(){db.ref('data').set(data)}
+function saveInfs(){db.ref('influencers').set(influencers)}
+function saveBgts(){db.ref('budgets').set(budgets)}
 function load(){
-  const d=localStorage.getItem('ap_data');
-  if(d){data=JSON.parse(d);idc=Math.max(...data.map(x=>x.id),100)+1}else seedData();
-  const i=localStorage.getItem('ap_infs');
-  if(i){influencers=JSON.parse(i);infc=Math.max(...influencers.map(x=>x.id),100)+1}else seedInf();
-  const b=localStorage.getItem('ap_bgts');
-  if(b)budgets=JSON.parse(b);else seedBgt();
+  // Initial load is handled by Firebase listeners in initFirebase()
+  // This is called as fallback - seed if no data arrives
+}
+let firebaseReady=false;
+function initFirebase(){
+  // Listen for all data changes in real-time
+  db.ref('data').on('value',snap=>{
+    const val=snap.val();
+    if(val){data=val;idc=Math.max(...data.map(x=>x.id),100)+1}
+    else if(!firebaseReady){seedData();}
+    firebaseReady=true;
+    refreshAllViews();
+  });
+  db.ref('influencers').on('value',snap=>{
+    const val=snap.val();
+    if(val){influencers=val;infc=Math.max(...influencers.map(x=>x.id),100)+1}
+    else if(!firebaseReady){seedInf();}
+    refreshAllViews();
+  });
+  db.ref('budgets').on('value',snap=>{
+    const val=snap.val();
+    if(val)budgets=val;
+    else if(!firebaseReady){seedBgt();}
+    refreshAllViews();
+  });
+  db.ref('stores').on('value',snap=>{
+    const val=snap.val();
+    if(val){STORES=val}
+    refreshAllViews();
+  });
+  db.ref('settings/password').on('value',snap=>{
+    const val=snap.val();
+    if(val)localStorage.setItem('ap_pw',val);
+  });
+}
+function refreshAllViews(){
+  if(isInfView){renderInfView();return}
+  if(isStoreView){renderStoreView();return}
+  // Admin views
+  try{renderST();renderCal()}catch(e){}
+  const activePage=document.querySelector('.page.active');
+  if(activePage){
+    const id=activePage.id;
+    if(id==='pg-dashboard')try{renderDash()}catch(e){}
+    if(id==='pg-influencer')try{renderInfs()}catch(e){}
+    if(id==='pg-report')try{renderRpt()}catch(e){}
+    if(id==='pg-budget')try{renderBgt()}catch(e){}
+  }
 }
 function seedData(){
   data=[
@@ -1788,7 +1845,6 @@ function renderIvMiniCal(){
 
 // ============ INIT ============
 loadStores();
-load();
 initMcDate();
 // Set current month from today
 const _now=new Date();curY=_now.getFullYear();curM=_now.getMonth();rptY=curY;rptM=curM;bgtY=curY;bgtM=curM;
@@ -1799,10 +1855,9 @@ if(checkInfluencerMode()){
   // Store view active
 }else{
   checkAuth();
-  renderST();
-  renderCal();
-  renderDash();
 }
+// Start Firebase real-time sync (will call refreshAllViews when data arrives)
+initFirebase();
 </script>
 </body>
 </html>
