@@ -382,6 +382,28 @@ input,select,textarea{font-family:inherit}
 .iv-empty{text-align:center;padding:40px 20px;color:var(--t3)}
 .iv-empty .eico{font-size:36px;margin-bottom:8px;opacity:.5}
 
+/* ===== MINI CALENDAR (매장/릴서 뷰) ===== */
+.mini-cal{background:var(--bg1);border-bottom:1px solid var(--bd);flex-shrink:0;padding:10px 16px}
+.mini-cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.mini-cal-nav h4{font-family:'Outfit';font-size:13px;font-weight:700}
+.mini-cal-nav button{width:24px;height:24px;border:1px solid var(--bd);background:none;border-radius:5px;color:var(--t2);font-size:11px;display:flex;align-items:center;justify-content:center}
+.mini-cal-nav button:hover{border-color:var(--bd2);color:var(--t1)}
+.mc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;text-align:center}
+.mc-head{font-size:9px;color:var(--t3);padding:2px 0;font-weight:600}
+.mc-head.sun{color:var(--dg)}.mc-head.sat{color:#3b82f6}
+.mc-day{font-size:10px;padding:4px 2px;border-radius:5px;cursor:pointer;transition:all .12s;position:relative}
+.mc-day:hover{background:var(--bg3)}
+.mc-day.oth{opacity:.2;pointer-events:none}
+.mc-day.today{background:var(--ac);color:#fff;font-weight:700}
+.mc-day.selected{outline:2px solid var(--ac);outline-offset:-1px;font-weight:700}
+.mc-day.has-ev::after{content:'';position:absolute;bottom:1px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--ig)}
+.mc-day.has-ev.done-all::after{background:var(--ok)}
+.mc-day.has-ev.has-overdue::after{background:var(--dg)}
+.mc-day.sun{color:var(--dg)}.mc-day.sat{color:#3b82f6}
+.mc-day.today.sun,.mc-day.today.sat{color:#fff}
+.mc-selected-info{margin-top:8px;padding:8px 10px;background:var(--bg2);border-radius:8px;font-size:11px;color:var(--t2);display:none}
+.mc-selected-info.show{display:block}
+
 /* Responsive */
 @media(max-width:1024px){
   .sidebar{width:60px}.sb-item span:not(.ico){display:none}.sb-badge{display:none}.sb-logo{font-size:0;padding:16px}.sb-logo::after{content:'AP';font-size:16px}
@@ -608,10 +630,11 @@ input,select,textarea{font-family:inherit}
     </div>
   </div>
   <div class="sv-stats" id="svStats"></div>
+  <div class="mini-cal" id="svMiniCal"></div>
   <div class="sv-tabs">
     <button class="sv-tab on" onclick="svFilter('today',this)">오늘</button>
     <button class="sv-tab" onclick="svFilter('upcoming',this)">예정</button>
-    <button class="sv-tab" onclick="svFilter('all',this)">전체</button>
+    <button class="sv-tab" onclick="svFilter('calendar',this)">📅 달력</button>
     <button class="sv-tab" onclick="svFilter('done',this)">완료</button>
   </div>
   <div class="sv-body" id="svBody"></div>
@@ -631,9 +654,11 @@ input,select,textarea{font-family:inherit}
     </div>
   </div>
   <div class="inf-view-stats" id="ivStats"></div>
+  <div class="mini-cal" id="ivMiniCal"></div>
   <div class="inf-view-tabs">
     <button class="iv-tab on" onclick="ivFilter('upcoming',this)">예정</button>
     <button class="iv-tab" onclick="ivFilter('all',this)">전체</button>
+    <button class="iv-tab" onclick="ivFilter('calendar',this)">📅 달력</button>
     <button class="iv-tab" onclick="ivFilter('done',this)">완료</button>
     <button class="iv-tab" onclick="ivFilter('earnings',this)">정산</button>
   </div>
@@ -706,6 +731,7 @@ input,select,textarea{font-family:inherit}
     <div class="f"><label>주요 플랫폼 (쉼표 구분)</label><input class="fi" id="iPlats" placeholder="instagram, tiktok, youtube"></div>
     <div class="f-row"><div class="f"><label>팔로워 수</label><input class="fi" id="iFollowers" type="number" placeholder="0"></div><div class="f"><label>평균 조회수</label><input class="fi" id="iAvgViews" type="number" placeholder="0"></div></div>
     <div class="f"><label>1건 단가 (원)</label><input class="fi" id="iRate" type="number" placeholder="0"></div>
+    <div class="f"><label>인스타 프로필 URL</label><div style="display:flex;gap:6px"><input class="fi" id="iProfileUrl" placeholder="https://www.instagram.com/handle" style="flex:1"><button type="button" class="bp" style="flex:none;width:60px;padding:8px;font-size:11px" onclick="const v=document.getElementById('iProfileUrl').value;if(v)window.open(v,'_blank');else{const h=document.getElementById('iHandle').value.replace('@','');if(h)window.open('https://www.instagram.com/'+h,'_blank');else alert('핸들을 먼저 입력하세요')}">확인</button></div></div>
     <div class="f"><label>연락처/메모</label><textarea class="fi" id="iMemo" rows="2" placeholder="카톡ID, 연락처, 특이사항 등"></textarea></div>
   </div>
   <div class="modal-a"><button class="bs" onclick="closeInfAdd()">취소</button><button class="bp" onclick="saveInf()">저장</button></div></div>
@@ -837,11 +863,11 @@ function seedData(){
 }
 function seedInf(){
   influencers=[
-    {id:1,name:'김푸디',handle:'@foodie_kim',category:'먹방/맛집',platforms:['instagram','tiktok'],followers:52000,avgViews:15000,rate:150000,memo:'카톡: foodiekim'},
-    {id:2,name:'먹방프로',handle:'@mukbang_pro',category:'먹방/맛집',platforms:['youtube','instagram'],followers:180000,avgViews:45000,rate:300000,memo:'매니저 연락: 010-xxxx'},
-    {id:3,name:'ASMR셰프',handle:'@asmr_chef',category:'먹방/맛집',platforms:['tiktok','youtube'],followers:95000,avgViews:28000,rate:200000,memo:'ASMR 전문'},
-    {id:4,name:'맛서울',handle:'@taste_seoul',category:'먹방/맛집',platforms:['naver','instagram'],followers:35000,avgViews:8000,rate:80000,memo:'블로그 전문'},
-    {id:5,name:'이자카야맨',handle:'@izakaya_kr',category:'라이프스타일',platforms:['tiktok','instagram'],followers:42000,avgViews:12000,rate:120000,memo:'일식 전문'},
+    {id:1,name:'김푸디',handle:'@foodie_kim',category:'먹방/맛집',platforms:['instagram','tiktok'],followers:52000,avgViews:15000,rate:150000,memo:'카톡: foodiekim',profileUrl:'https://www.instagram.com/foodie_kim'},
+    {id:2,name:'먹방프로',handle:'@mukbang_pro',category:'먹방/맛집',platforms:['youtube','instagram'],followers:180000,avgViews:45000,rate:300000,memo:'매니저 연락: 010-xxxx',profileUrl:'https://www.instagram.com/mukbang_pro'},
+    {id:3,name:'ASMR셰프',handle:'@asmr_chef',category:'먹방/맛집',platforms:['tiktok','youtube'],followers:95000,avgViews:28000,rate:200000,memo:'ASMR 전문',profileUrl:'https://www.instagram.com/asmr_chef'},
+    {id:4,name:'맛서울',handle:'@taste_seoul',category:'먹방/맛집',platforms:['naver','instagram'],followers:35000,avgViews:8000,rate:80000,memo:'블로그 전문',profileUrl:'https://www.instagram.com/taste_seoul'},
+    {id:5,name:'이자카야맨',handle:'@izakaya_kr',category:'라이프스타일',platforms:['tiktok','instagram'],followers:42000,avgViews:12000,rate:120000,memo:'일식 전문',profileUrl:'https://www.instagram.com/izakaya_kr'},
   ];infc=6;saveInfs();
 }
 function seedBgt(){
@@ -1195,6 +1221,7 @@ function renderInfs(){
       <div class="inf-plats">${(inf.platforms||[]).map(p=>`<span class="inf-pt ${p}">${PLATS[p]?.n||p}</span>`).join('')}</div>
       <div style="font-size:10px;color:var(--t2);margin-top:8px">협업 ${used}회${inf.memo?' · '+inf.memo:''}</div>
       <div class="inf-actions">
+        ${inf.profileUrl?`<button class="inf-btn" onclick="window.open('${inf.profileUrl}','_blank')" style="border-color:var(--ig);color:var(--ig)">📸 프로필</button>`:`<button class="inf-btn" onclick="window.open('https://www.instagram.com/${inf.handle.replace('@','')}','_blank')" style="border-color:var(--ig);color:var(--ig)">📸 인스타</button>`}
         <button class="inf-btn" onclick="editInf(${inf.id})">✏️ 수정</button>
         <button class="inf-btn" onclick="if(confirm('삭제?')){influencers=influencers.filter(x=>x.id!==${inf.id});saveInfs();renderInfs()}">🗑️</button>
       </div>
@@ -1203,7 +1230,7 @@ function renderInfs(){
 }
 function openInfAdd(){
   infEditId=null;document.getElementById('infAddTi').textContent='인플루언서 추가';
-  ['iName','iHandle','iPlats','iMemo'].forEach(x=>document.getElementById(x).value='');
+  ['iName','iHandle','iPlats','iMemo','iProfileUrl'].forEach(x=>document.getElementById(x).value='');
   ['iFollowers','iAvgViews','iRate'].forEach(x=>document.getElementById(x).value='');
   document.getElementById('infOv').classList.add('show');
 }
@@ -1216,6 +1243,7 @@ function editInf(id){
   document.getElementById('iPlats').value=(inf.platforms||[]).join(', ');
   document.getElementById('iFollowers').value=inf.followers;document.getElementById('iAvgViews').value=inf.avgViews;
   document.getElementById('iRate').value=inf.rate;document.getElementById('iMemo').value=inf.memo||'';
+  document.getElementById('iProfileUrl').value=inf.profileUrl||'';
   document.getElementById('infOv').classList.add('show');
 }
 function saveInf(){
@@ -1226,7 +1254,8 @@ function saveInf(){
     followers:parseInt(document.getElementById('iFollowers').value)||0,
     avgViews:parseInt(document.getElementById('iAvgViews').value)||0,
     rate:parseInt(document.getElementById('iRate').value)||0,
-    memo:document.getElementById('iMemo').value
+    memo:document.getElementById('iMemo').value,
+    profileUrl:document.getElementById('iProfileUrl').value.trim()
   };
   if(infEditId){const i=influencers.findIndex(x=>x.id===infEditId);if(i>=0)influencers[i]={...influencers[i],...obj}}
   else{obj.id=infc++;influencers.push(obj)}
@@ -1463,6 +1492,7 @@ function renderStoreView(){
     <div class="sv-stat"><div class="sv-stat-n" style="color:var(--ok)">${done.length}</div><div class="sv-stat-l">완료</div></div>
     <div class="sv-stat"><div class="sv-stat-n" style="color:${overdue.length?'var(--dg)':'var(--t1)'}">${overdue.length}</div><div class="sv-stat-l">지연</div></div>`;
 
+  renderSvMiniCal();
   renderSvList();
 }
 
@@ -1480,11 +1510,12 @@ function renderSvList(){
   if(svFilterMode==='today') evs=evs.filter(e=>e.date===t);
   else if(svFilterMode==='upcoming') evs=evs.filter(e=>e.date>=t&&e.status!=='done'&&e.status!=='cancelled');
   else if(svFilterMode==='done') evs=evs.filter(e=>e.status==='done');
+  else if(svFilterMode==='calendar') evs=mcSvSel?evs.filter(e=>e.date===mcSvSel):evs.filter(e=>e.date===t);
 
   evs.sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time));
 
   if(!evs.length){
-    const msgs={today:'오늘 방문 예정인 릴서가 없습니다.',upcoming:'예정된 촬영이 없습니다.',done:'완료된 콘텐츠가 없습니다.',all:'등록된 스케줄이 없습니다.'};
+    const msgs={today:'오늘 방문 예정인 릴서가 없습니다.',upcoming:'예정된 촬영이 없습니다.',done:'완료된 콘텐츠가 없습니다.',all:'등록된 스케줄이 없습니다.',calendar:mcSvSel?`${mcSvSel} 스케줄 없음`:'날짜를 선택하세요'};
     document.getElementById('svBody').innerHTML=`<div class="iv-empty"><div class="eico">📭</div><p>${msgs[svFilterMode]||msgs.all}</p></div>`;
     return;
   }
@@ -1573,6 +1604,7 @@ function renderInfView(){
     <div class="iv-stat"><div class="iv-stat-n" style="color:var(--ok)">${done.length}</div><div class="iv-stat-l">완료</div></div>
     <div class="iv-stat"><div class="iv-stat-n" style="font-size:13px">${fmt(totalCost)}</div><div class="iv-stat-l">총 금액(원)</div></div>`;
 
+  renderIvMiniCal();
   renderIvList();
 }
 
@@ -1615,11 +1647,13 @@ function renderIvList(){
 
   if(ivFilterMode==='upcoming') evs=evs.filter(e=>e.date>=t&&e.status!=='done'&&e.status!=='cancelled');
   else if(ivFilterMode==='done') evs=evs.filter(e=>e.status==='done');
+  else if(ivFilterMode==='calendar') evs=mcIvSel?evs.filter(e=>e.date===mcIvSel):evs.filter(e=>e.date===t);
 
   evs.sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time));
 
   if(!evs.length){
-    document.getElementById('ivBody').innerHTML=`<div class="iv-empty"><div class="eico">📭</div><p>${ivFilterMode==='done'?'완료된 스케줄이 없습니다.':'예정된 스케줄이 없습니다.'}</p></div>`;
+    const emptyMsg=ivFilterMode==='done'?'완료된 스케줄이 없습니다.':ivFilterMode==='calendar'?(mcIvSel?`${mcIvSel} 스케줄 없음`:'달력에서 날짜를 선택하세요'):'예정된 스케줄이 없습니다.';
+    document.getElementById('ivBody').innerHTML=`<div class="iv-empty"><div class="eico">📭</div><p>${emptyMsg}</p></div>`;
     return;
   }
 
@@ -1692,9 +1726,70 @@ function ivSaveUpload(id){
   if(ev){ev.uploadUrl=url;save();renderIvList();alert('업로드 링크가 등록되었습니다!')}
 }
 
+// ============ MINI CALENDAR (공용) ============
+let mcSvY,mcSvM,mcSvSel=null;
+let mcIvY,mcIvM,mcIvSel=null;
+
+function initMcDate(){const n=new Date();mcSvY=mcIvY=n.getFullYear();mcSvM=mcIvM=n.getMonth()}
+
+function renderMiniCal(target,year,month,evs,onNav,onSelect,selectedDate){
+  const mn=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const t=td();
+  const f1=new Date(year,month,1).getDay();
+  const dim=new Date(year,month+1,0).getDate();
+  const pdim=new Date(year,month,0).getDate();
+
+  let h=`<div class="mini-cal-nav"><button onclick="${onNav}(-1)">◀</button><h4>${year}년 ${mn[month]}</h4><button onclick="${onNav}(1)">▶</button></div>`;
+  h+=`<div class="mc-grid">`;
+  const dh=[['일','sun'],['월',''],['화',''],['수',''],['목',''],['금',''],['토','sat']];
+  dh.forEach(([d,c])=>{h+=`<div class="mc-head ${c}">${d}</div>`});
+
+  for(let i=f1-1;i>=0;i--) h+=`<div class="mc-day oth">${pdim-i}</div>`;
+
+  for(let d=1;d<=dim;d++){
+    const ds=`${year}-${S(month+1)}-${S(d)}`;
+    const dow=(f1+d-1)%7;
+    const isT=ds===t;
+    const isSel=ds===selectedDate;
+    const dayEvs=evs.filter(e=>e.date===ds);
+    const hasEv=dayEvs.length>0;
+    const allDone=hasEv&&dayEvs.every(e=>e.status==='done');
+    const hasOverdue=hasEv&&ds<t&&dayEvs.some(e=>e.status==='scheduled'||e.status==='progress');
+    let cls='mc-day';
+    if(isT)cls+=' today';
+    if(isSel)cls+=' selected';
+    if(dow===0)cls+=' sun';
+    if(dow===6)cls+=' sat';
+    if(hasEv)cls+=allDone?' has-ev done-all':hasOverdue?' has-ev has-overdue':' has-ev';
+    h+=`<div class="${cls}" onclick="${onSelect}('${ds}')">${d}</div>`;
+  }
+  const tot=f1+dim;const rem=(7-tot%7)%7;
+  for(let i=1;i<=rem;i++) h+=`<div class="mc-day oth">${i}</div>`;
+  h+=`</div>`;
+
+  document.getElementById(target).innerHTML=h;
+}
+
+// Store view mini calendar
+function svMcNav(d){mcSvM+=d;if(mcSvM>11){mcSvM=0;mcSvY++}if(mcSvM<0){mcSvM=11;mcSvY--}renderSvMiniCal()}
+function svMcSelect(ds){mcSvSel=ds;renderSvMiniCal();svFilter('calendar',document.querySelector('.sv-tab:nth-child(3)'))}
+function renderSvMiniCal(){
+  const evs=data.filter(e=>e.store===svStoreKey);
+  renderMiniCal('svMiniCal',mcSvY,mcSvM,evs,'svMcNav','svMcSelect',mcSvSel);
+}
+
+// Influencer view mini calendar
+function ivMcNav(d){mcIvM+=d;if(mcIvM>11){mcIvM=0;mcIvY++}if(mcIvM<0){mcIvM=11;mcIvY--}renderIvMiniCal()}
+function ivMcSelect(ds){mcIvSel=ds;renderIvMiniCal();ivFilter('calendar',document.querySelector('.iv-tab:nth-child(3)'))}
+function renderIvMiniCal(){
+  const evs=data.filter(e=>e.influencer===ivHandle);
+  renderMiniCal('ivMiniCal',mcIvY,mcIvM,evs,'ivMcNav','ivMcSelect',mcIvSel);
+}
+
 // ============ INIT ============
 loadStores();
 load();
+initMcDate();
 // Set current month from today
 const _now=new Date();curY=_now.getFullYear();curM=_now.getMonth();rptY=curY;rptM=curM;bgtY=curY;bgtM=curM;
 
