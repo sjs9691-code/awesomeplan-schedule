@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWESOMEPLAN - 광고 스케줄 관리</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg0:#0a0a0f;--bg1:#12121a;--bg2:#1a1a26;--bg3:#222232;--bg4:#2a2a3a;
+  --bd:rgba(255,255,255,.06);--bd2:rgba(255,255,255,.12);
+  --t1:#f0f0f5;--t2:#8888a0;--t3:#55556a;
+  --ac:#6366f1;--ac2:#4f46e5;--acg:rgba(99,102,241,.15);
+  --ig:#E1306C;--yt:#FF0000;--tt:#00f2ea;--tw:#1DA1F2;--fb:#4267B2;--nv:#03C75A;
+  --ok:#22c55e;--wn:#f59e0b;--dg:#ef4444;
+  --r:12px;
+}
+body{font-family:'Noto Sans KR','Outfit',sans-serif;background:var(--bg0);color:var(--t1);height:100vh;overflow:hidden}
+button{cursor:pointer;font-family:inherit}
+input,select,textarea{font-family:inherit}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:4px}
+
+/* ===== LOGIN ===== */
+.login-screen{position:fixed;inset:0;background:var(--bg0);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.login-screen.hidden{display:none}
+.login-box{width:360px;background:var(--bg2);border:1px solid var(--bd);border-radius:18px;padding:40px 32px;text-align:center}
+.login-logo{font-family:'Outfit';font-weight:800;font-size:28px;background:linear-gradient(135deg,var(--ac),#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+.login-sub{font-size:13px;color:var(--t2);margin-bottom:28px}
+.login-input{width:100%;padding:12px 16px;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;color:var(--t1);font-size:14px;outline:none;margin-bottom:12px;text-align:center;letter-spacing:4px;transition:border-color .2s}
+.login-input:focus{border-color:var(--ac)}
+.login-input::placeholder{letter-spacing:0}
+.login-btn{width:100%;padding:12px;background:var(--ac);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:600;transition:background .2s}
+.login-btn:hover{background:var(--ac2)}
+.login-err{font-size:12px;color:var(--dg);margin-top:10px;min-height:18px}
+
+/* ===== APP LAYOUT ===== */
+.app{display:flex;height:100vh}
+.app.locked{filter:blur(10px);pointer-events:none}
+.sidebar{width:220px;background:var(--bg1);border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0}
+.sb-logo{padding:18px 20px;font-family:'Outfit';font-weight:800;font-size:17px;background:linear-gradient(135deg,var(--ac),#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;border-bottom:1px solid var(--bd)}
+.sb-nav{flex:1;padding:12px 10px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:500;color:var(--t2);border:none;background:none;width:100%;text-align:left;transition:all .15s;margin-bottom:2px}
+.sb-item:hover{background:var(--bg2);color:var(--t1)}
+.sb-item.active{background:var(--acg);color:var(--ac)}
+.sb-item .ico{font-size:17px;width:24px;text-align:center}
+.sb-badge{margin-left:auto;background:var(--dg);color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px}
+.sb-footer{padding:12px 10px;border-top:1px solid var(--bd)}
+.sb-footer .sb-item{color:var(--t3)}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* Topbar */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:var(--bg1);border-bottom:1px solid var(--bd);min-height:52px;flex-shrink:0}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.page-icon{font-size:18px}
+.page-name{font-size:15px;font-weight:600}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.tb{height:34px;padding:0 12px;border:1px solid var(--bd);background:var(--bg2);border-radius:8px;color:var(--t2);font-size:12px;font-weight:500;display:flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
+.tb:hover{border-color:var(--bd2);color:var(--t1)}
+.tb.acc{border-color:var(--ac);color:var(--ac);background:var(--acg)}
+.tb.acc:hover{background:rgba(99,102,241,.25)}
+
+/* Store bar */
+.store-bar{display:flex;gap:6px;padding:10px 20px;background:var(--bg1);border-bottom:1px solid var(--bd);overflow-x:auto;flex-shrink:0}
+.store-bar::-webkit-scrollbar{display:none}
+.st{padding:6px 13px;border:1px solid var(--bd);background:none;border-radius:8px;color:var(--t2);font-size:11px;font-weight:500;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .15s}
+.st:hover{border-color:var(--bd2);color:var(--t1)}
+.st.on{border-color:var(--ac);background:var(--acg);color:var(--ac)}
+.st-dot{width:7px;height:7px;border-radius:50%}
+.st-cnt{background:rgba(255,255,255,.06);padding:1px 6px;border-radius:8px;font-size:9px;font-weight:600}
+.st.on .st-cnt{background:rgba(99,102,241,.2)}
+
+/* Content */
+.content{flex:1;display:flex;overflow:hidden}
+.content-body{flex:1;overflow-y:auto;padding:20px}
+.page{display:none;flex-direction:column;flex:1;overflow:hidden}
+.page.active{display:flex}
+
+/* ===== DASHBOARD ===== */
+.dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.dash-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:18px;transition:border-color .15s}
+.dash-card:hover{border-color:var(--bd2)}
+.dash-card-label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-weight:600}
+.dash-card-num{font-family:'Outfit';font-size:28px;font-weight:700}
+.dash-card-sub{font-size:10px;color:var(--t2);margin-top:4px}
+.dash-section{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:18px;margin-bottom:16px}
+.dash-section h3{font-size:14px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.dash-section h3 .cnt{font-family:'Outfit';background:var(--acg);color:var(--ac);padding:2px 8px;border-radius:10px;font-size:11px}
+.dash-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--bd);font-size:12px}
+.dash-row:last-child{border-bottom:none}
+.dash-row .time{font-family:'Outfit';color:var(--t2);min-width:50px}
+.dash-row .store{display:flex;align-items:center;gap:6px;min-width:100px}
+.dash-row .title{flex:1;font-weight:500}
+.dash-row .inf{color:var(--ac);min-width:90px}
+.dash-2col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.dash-alert{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);border-radius:8px;margin-bottom:8px;font-size:12px}
+.dash-alert.warn{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.15)}
+.dash-alert .alert-ico{font-size:16px;flex-shrink:0}
+
+/* ===== CALENDAR ===== */
+.cal-controls{display:flex;align-items:center;justify-content:space-between;padding:0 0 14px;flex-shrink:0}
+.mnav{display:flex;align-items:center;gap:12px}
+.mnav h2{font-family:'Outfit';font-size:20px;font-weight:700;min-width:140px}
+.nbtn{width:30px;height:30px;border:1px solid var(--bd);background:var(--bg2);border-radius:7px;color:var(--t2);display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s}
+.nbtn:hover{border-color:var(--bd2);color:var(--t1)}
+.cal-stats{display:flex;gap:14px}
+.cst{font-size:11px;color:var(--t2);display:flex;align-items:center;gap:4px}
+.cst b{font-family:'Outfit';font-size:15px;color:var(--t1)}
+.cst b.w{color:var(--wn)}.cst b.d{color:var(--dg)}
+.plats{display:flex;gap:10px;padding:0 0 10px;flex-wrap:wrap;flex-shrink:0}
+.pl{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t3)}
+.pld{width:8px;height:8px;border-radius:3px}
+.cal-wrap{flex:1;overflow-y:auto}
+.cg{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--bd);border-radius:var(--r);overflow:hidden}
+.ch{background:var(--bg2);padding:7px;text-align:center;font-size:10px;font-weight:600;color:var(--t3);letter-spacing:.5px}
+.ch.sun{color:var(--dg)}.ch.sat{color:#3b82f6}
+.cc{background:var(--bg1);min-height:95px;padding:5px;cursor:pointer;transition:background .1s;position:relative}
+.cc:hover{background:var(--bg2)}
+.cc.oth{opacity:.2;pointer-events:none}
+.cc.tod{background:rgba(99,102,241,.06)}
+.cc.tod .dn{background:var(--ac);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px}
+.dn{font-size:11px;font-weight:600;margin-bottom:2px;color:var(--t1)}
+.cc.sun .dn{color:var(--dg)}.cc.sat .dn{color:#3b82f6}
+.ev{display:flex;align-items:center;gap:3px;padding:2px 4px;border-radius:3px;font-size:8px;font-weight:500;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:transform .1s;cursor:grab}
+.ev:hover{transform:translateX(1px)}
+.ev.dragging{opacity:.4}
+.ev.instagram{background:rgba(225,48,108,.15);color:#f472b6;border-left:2px solid var(--ig)}
+.ev.youtube{background:rgba(255,0,0,.12);color:#f87171;border-left:2px solid var(--yt)}
+.ev.tiktok{background:rgba(0,242,234,.1);color:#5eead4;border-left:2px solid var(--tt)}
+.ev.twitter{background:rgba(29,161,242,.12);color:#60a5fa;border-left:2px solid var(--tw)}
+.ev.facebook{background:rgba(66,103,178,.15);color:#93b5f6;border-left:2px solid var(--fb)}
+.ev.naver{background:rgba(3,199,90,.12);color:#4ade80;border-left:2px solid var(--nv)}
+.ev.ev-done{opacity:.4;text-decoration:line-through}
+.ev-more{font-size:8px;color:var(--t3);padding:1px 4px}
+.cc .add-h{position:absolute;bottom:3px;right:5px;font-size:14px;color:var(--t3);opacity:0;transition:opacity .15s}
+.cc:hover .add-h{opacity:.4}
+.cc.drag-over{background:rgba(99,102,241,.12)!important;outline:2px dashed var(--ac);outline-offset:-2px}
+
+/* ===== CHAT PANEL ===== */
+.chat-p{width:350px;border-left:1px solid var(--bd);display:flex;flex-direction:column;background:var(--bg1);flex-shrink:0}
+.chat-h{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--bd)}
+.chat-hl{display:flex;align-items:center;gap:8px}
+.chat-av{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--ac),#a78bfa);display:flex;align-items:center;justify-content:center;font-size:14px}
+.chat-hi h3{font-size:12px;font-weight:600}.chat-hi span{font-size:9px;color:var(--ok);display:flex;align-items:center;gap:3px}
+.chat-hi span::before{content:'';width:5px;height:5px;background:var(--ok);border-radius:50%}
+.chat-x{width:28px;height:28px;border:1px solid var(--bd);background:none;border-radius:6px;color:var(--t2);font-size:12px;display:flex;align-items:center;justify-content:center}
+.chat-ms{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:90%;animation:mI .25s ease}
+@keyframes mI{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.msg.bot{align-self:flex-start}.msg.user{align-self:flex-end}
+.mb{padding:8px 12px;border-radius:12px;font-size:11px;line-height:1.6;word-break:break-word}
+.msg.bot .mb{background:var(--bg2);color:var(--t1);border-bottom-left-radius:3px}
+.msg.user .mb{background:var(--ac);color:#fff;border-bottom-right-radius:3px}
+.mt{font-size:8px;color:var(--t3);margin-top:2px;padding:0 3px}
+.msg.user .mt{text-align:right}
+.qbar{display:flex;flex-wrap:wrap;gap:4px;padding:6px 16px;border-top:1px solid var(--bd)}
+.qb{padding:4px 9px;border:1px solid var(--bd);background:none;border-radius:14px;color:var(--t2);font-size:9px;transition:all .15s;white-space:nowrap}
+.qb:hover{border-color:var(--ac);color:var(--ac)}
+.chat-ia{padding:8px 16px 12px;border-top:1px solid var(--bd)}
+.chat-iw{display:flex;align-items:flex-end;gap:6px;background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:6px 6px 6px 12px;transition:border-color .2s}
+.chat-iw:focus-within{border-color:var(--ac)}
+.chat-in{flex:1;border:none;background:none;color:var(--t1);font-size:11px;resize:none;outline:none;max-height:60px;line-height:1.4}
+.chat-in::placeholder{color:var(--t3)}
+.chat-sn{width:30px;height:30px;border:none;background:var(--ac);border-radius:7px;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;transition:background .15s}
+.chat-sn:hover{background:var(--ac2)}
+.tdots{display:flex;gap:3px;padding:2px 0}
+.tdots span{width:5px;height:5px;background:var(--t3);border-radius:50%;animation:tb 1.4s infinite}
+.tdots span:nth-child(2){animation-delay:.2s}.tdots span:nth-child(3){animation-delay:.4s}
+@keyframes tb{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
+
+/* ===== INFLUENCER PAGE ===== */
+.inf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.inf-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px;transition:border-color .15s}
+.inf-card:hover{border-color:var(--bd2)}
+.inf-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.inf-avi{width:44px;height:44px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.inf-name{font-size:14px;font-weight:600}
+.inf-handle{font-size:11px;color:var(--ac)}
+.inf-cat{font-size:10px;color:var(--t2);margin-top:2px}
+.inf-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.inf-st{background:var(--bg3);border-radius:8px;padding:8px;text-align:center}
+.inf-st-n{font-family:'Outfit';font-size:15px;font-weight:700;color:var(--t1)}
+.inf-st-l{font-size:9px;color:var(--t3);margin-top:2px}
+.inf-plats{display:flex;gap:4px;flex-wrap:wrap}
+.inf-pt{padding:3px 8px;border-radius:5px;font-size:10px;font-weight:500}
+.inf-pt.instagram{background:rgba(225,48,108,.12);color:#f472b6}
+.inf-pt.youtube{background:rgba(255,0,0,.1);color:#f87171}
+.inf-pt.tiktok{background:rgba(0,242,234,.08);color:#5eead4}
+.inf-pt.naver{background:rgba(3,199,90,.1);color:#4ade80}
+.inf-actions{display:flex;gap:6px;margin-top:10px}
+.inf-btn{flex:1;padding:7px;border:1px solid var(--bd);background:none;border-radius:7px;font-size:10px;color:var(--t2);transition:all .15s}
+.inf-btn:hover{border-color:var(--bd2);color:var(--t1)}
+.inf-btn.primary{background:var(--ac);border-color:var(--ac);color:#fff}
+
+/* ===== REPORT PAGE ===== */
+.rpt-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.rpt-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.rpt-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px}
+.rpt-card-label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.rpt-card-num{font-family:'Outfit';font-size:26px;font-weight:700}
+.rpt-card-sub{font-size:10px;color:var(--t2);margin-top:4px}
+.rpt-section{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:18px;margin-bottom:16px}
+.rpt-section h3{font-size:14px;font-weight:600;margin-bottom:14px}
+.rpt-table{width:100%;border-collapse:collapse}
+.rpt-table th{text-align:left;font-size:10px;color:var(--t3);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--bd);text-transform:uppercase;letter-spacing:.3px}
+.rpt-table td{font-size:12px;padding:10px;border-bottom:1px solid var(--bd);color:var(--t1)}
+.rpt-table tr:last-child td{border-bottom:none}
+
+/* ===== BUDGET PAGE ===== */
+.bgt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.bgt-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:18px}
+.bgt-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.bgt-card-name{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600}
+.bgt-total{font-family:'Outfit';font-size:18px;font-weight:700;color:var(--ac)}
+.bgt-bar{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;margin:10px 0}
+.bgt-bar-fill{height:100%;border-radius:4px;transition:width .5s}
+.bgt-detail{display:flex;justify-content:space-between;font-size:11px;color:var(--t2)}
+.bgt-items{margin-top:12px}
+.bgt-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd);font-size:12px}
+.bgt-item:last-child{border-bottom:none}
+
+/* ===== KAKAO NOTIFICATION ===== */
+.kakao-section{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:18px;margin-bottom:16px}
+.kakao-msg{background:#fef01b;color:#3c1e1e;padding:14px;border-radius:12px;font-size:12px;line-height:1.7;margin:10px 0;font-weight:400;white-space:pre-line;border-bottom-left-radius:3px}
+.kakao-copy{padding:8px 16px;background:var(--ac);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:600;transition:background .15s}
+.kakao-copy:hover{background:var(--ac2)}
+
+/* ===== MODALS ===== */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center}
+.ov.show{display:flex}
+.modal{width:460px;max-height:85vh;background:var(--bg2);border:1px solid var(--bd);border-radius:16px;overflow-y:auto}
+.modal-t{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--bd);position:sticky;top:0;background:var(--bg2);z-index:1}
+.modal-t h3{font-size:14px;font-weight:600}
+.mx{width:28px;height:28px;border:1px solid var(--bd);background:none;border-radius:6px;color:var(--t2);font-size:13px;display:flex;align-items:center;justify-content:center}
+.modal-b{padding:18px 20px}
+.f{margin-bottom:12px}
+.f label{display:block;font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.fi{width:100%;padding:8px 10px;background:var(--bg3);border:1px solid var(--bd);border-radius:7px;color:var(--t1);font-size:12px;outline:none;transition:border-color .2s}
+.fi:focus{border-color:var(--ac)}
+.fi option{background:var(--bg2)}
+.f-row{display:flex;gap:8px}
+.f-row>div{flex:1}
+.modal-a{display:flex;gap:8px;padding:14px 20px;border-top:1px solid var(--bd);position:sticky;bottom:0;background:var(--bg2)}
+.bp{flex:1;padding:9px;background:var(--ac);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:600;transition:background .15s}
+.bp:hover{background:var(--ac2)}
+.bp.dg{background:var(--dg)}.bp.dg:hover{background:#dc2626}
+.bs{flex:1;padding:9px;background:none;border:1px solid var(--bd);border-radius:8px;color:var(--t2);font-size:12px;font-weight:500}
+.fv{font-size:12px;color:var(--t1);line-height:1.5}
+.ptag{display:inline-flex;padding:3px 8px;border-radius:5px;font-size:10px;font-weight:500}
+.ptag.instagram{background:rgba(225,48,108,.12);color:#f472b6}
+.ptag.youtube{background:rgba(255,0,0,.1);color:#f87171}
+.ptag.tiktok{background:rgba(0,242,234,.08);color:#5eead4}
+.ptag.twitter{background:rgba(29,161,242,.1);color:#60a5fa}
+.ptag.facebook{background:rgba(66,103,178,.12);color:#93b5f6}
+.ptag.naver{background:rgba(3,199,90,.1);color:#4ade80}
+.stag{display:inline-flex;padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600}
+.stag.scheduled{background:rgba(99,102,241,.12);color:#818cf8}
+.stag.progress{background:rgba(245,158,11,.12);color:#fbbf24}
+.stag.done{background:rgba(34,197,94,.12);color:#4ade80}
+.stag.review{background:rgba(236,72,153,.12);color:#f472b6}
+.stag.cancelled{background:rgba(239,68,68,.12);color:#f87171}
+
+/* Share */
+.share-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:var(--bg3);border-radius:9px;margin-bottom:6px;border:1px solid var(--bd)}
+.share-name{font-size:12px;font-weight:600;margin-bottom:1px}
+.share-url{font-size:9px;color:var(--ac);font-family:'Outfit',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:250px}
+.share-meta{font-size:9px;color:var(--t3);margin-top:1px}
+.share-btns{display:flex;gap:4px;flex-shrink:0}
+.scb{padding:5px 10px;border:1px solid var(--bd);background:none;border-radius:6px;color:var(--t2);font-size:10px;font-weight:500;transition:all .15s}
+.scb:hover{border-color:var(--ac);color:var(--ac)}
+
+/* Empty state */
+.empty{text-align:center;padding:60px 20px;color:var(--t3)}
+.empty .eico{font-size:42px;margin-bottom:10px;opacity:.5}
+.empty p{font-size:13px}
+
+/* Color picker */
+.color-opt{cursor:pointer;display:inline-flex}
+.color-opt input{display:none}
+.color-opt span{width:28px;height:28px;border-radius:8px;display:block;border:2px solid transparent;transition:all .15s}
+.color-opt input:checked+span{border-color:#fff;transform:scale(1.15);box-shadow:0 0 10px rgba(255,255,255,.3)}
+.color-opt:hover span{transform:scale(1.1)}
+
+/* ===== STORE VIEW (매장 전용) ===== */
+.store-view{display:none;flex-direction:column;height:100vh;background:var(--bg0);overflow:hidden}
+.store-view.active{display:flex}
+.sv-head{background:var(--bg1);border-bottom:1px solid var(--bd);padding:16px 20px;flex-shrink:0}
+.sv-logo{font-family:'Outfit';font-weight:800;font-size:14px;background:linear-gradient(135deg,var(--ac),#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
+.sv-store-info{display:flex;align-items:center;gap:12px}
+.sv-store-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.sv-store-name{font-size:18px;font-weight:700}
+.sv-store-sub{font-size:11px;color:var(--t2);margin-top:2px}
+.sv-tabs{display:flex;gap:0;background:var(--bg1);border-bottom:1px solid var(--bd);flex-shrink:0;overflow-x:auto}
+.sv-tabs::-webkit-scrollbar{display:none}
+.sv-tab{flex:1;padding:10px 14px;border:none;background:none;color:var(--t2);font-size:11px;font-weight:600;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;min-width:70px;text-align:center}
+.sv-tab:hover{color:var(--t1)}
+.sv-tab.on{color:var(--ac);border-bottom-color:var(--ac);background:var(--acg)}
+.sv-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 16px;background:var(--bg1);border-bottom:1px solid var(--bd);flex-shrink:0}
+.sv-stat{text-align:center;padding:8px 4px;background:var(--bg2);border-radius:8px}
+.sv-stat-n{font-family:'Outfit';font-size:18px;font-weight:700}
+.sv-stat-l{font-size:9px;color:var(--t3);margin-top:2px}
+.sv-body{flex:1;overflow-y:auto;padding:16px}
+.sv-today-banner{background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(167,139,250,.1));border:1px solid rgba(99,102,241,.2);border-radius:var(--r);padding:16px;margin-bottom:16px}
+.sv-today-banner h3{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sv-visit-card{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:8px;transition:border-color .15s}
+.sv-visit-card:hover{border-color:var(--bd2)}
+.sv-visit-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.sv-visit-inf{display:flex;align-items:center;gap:10px}
+.sv-visit-avi{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--ig),#a78bfa);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.sv-visit-name{font-size:13px;font-weight:600}
+.sv-visit-handle{font-size:10px;color:var(--ac)}
+.sv-visit-time{font-family:'Outfit';font-size:14px;font-weight:700;color:var(--t1)}
+.sv-visit-body{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.sv-visit-title{font-size:13px;font-weight:500}
+.sv-dday{font-family:'Outfit';font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px}
+.sv-dday.today{background:var(--ac);color:#fff}
+.sv-dday.soon{background:rgba(245,158,11,.15);color:var(--wn)}
+.sv-dday.future{background:var(--bg3);color:var(--t2)}
+.sv-dday.past{background:rgba(239,68,68,.12);color:var(--dg)}
+.sv-date-group{margin-bottom:16px}
+.sv-date-label{font-size:11px;font-weight:700;color:var(--t2);padding:6px 0;border-bottom:1px solid var(--bd);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.sv-upload-link{display:flex;align-items:center;gap:6px;padding:6px 10px;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.15);border-radius:6px;margin-top:8px;font-size:11px;color:var(--ac);text-decoration:none;word-break:break-all}
+.sv-upload-link:hover{background:rgba(99,102,241,.15)}
+
+/* ===== INFLUENCER VIEW (릴서 전용) ===== */
+.inf-view{display:none;flex-direction:column;height:100vh;background:var(--bg0);overflow:hidden}
+.inf-view.active{display:flex}
+.inf-view-head{background:var(--bg1);border-bottom:1px solid var(--bd);padding:16px 20px;flex-shrink:0}
+.inf-view-logo{font-family:'Outfit';font-weight:800;font-size:14px;background:linear-gradient(135deg,var(--ac),#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
+.inf-view-profile{display:flex;align-items:center;gap:12px}
+.inf-view-avi{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--ig),#a78bfa);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.inf-view-name{font-size:16px;font-weight:700}
+.inf-view-handle{font-size:12px;color:var(--ac)}
+.inf-view-meta{font-size:10px;color:var(--t2);margin-top:2px}
+.inf-view-tabs{display:flex;gap:0;background:var(--bg1);border-bottom:1px solid var(--bd);flex-shrink:0;overflow-x:auto}
+.inf-view-tabs::-webkit-scrollbar{display:none}
+.iv-tab{flex:1;padding:10px 14px;border:none;background:none;color:var(--t2);font-size:11px;font-weight:600;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;min-width:70px;text-align:center}
+.iv-tab:hover{color:var(--t1)}
+.iv-tab.on{color:var(--ac);border-bottom-color:var(--ac);background:var(--acg)}
+.inf-view-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 16px;background:var(--bg1);border-bottom:1px solid var(--bd);flex-shrink:0}
+.iv-stat{text-align:center;padding:8px 4px;background:var(--bg2);border-radius:8px}
+.iv-stat-n{font-family:'Outfit';font-size:18px;font-weight:700}
+.iv-stat-l{font-size:9px;color:var(--t3);margin-top:2px}
+.inf-view-body{flex:1;overflow-y:auto;padding:12px 16px}
+.iv-alert{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;margin-bottom:12px;font-size:12px;font-weight:500;animation:mI .3s ease}
+.iv-alert.urgent{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#f87171}
+.iv-alert.today{background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(167,139,250,.08));border:1px solid rgba(99,102,241,.2);color:var(--ac)}
+.iv-alert.tomorrow{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.15);color:#fbbf24}
+.iv-alert .alert-ico{font-size:18px;flex-shrink:0}
+.iv-date-group{margin-bottom:16px}
+.iv-date-label{font-size:11px;font-weight:700;color:var(--t2);padding:6px 0;border-bottom:1px solid var(--bd);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.iv-date-label .iv-today{background:var(--ac);color:#fff;padding:1px 6px;border-radius:4px;font-size:9px}
+.iv-card{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:8px;transition:border-color .15s}
+.iv-card:hover{border-color:var(--bd2)}
+.iv-card.highlight{border-color:var(--ac);background:rgba(99,102,241,.04)}
+.iv-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.iv-card-store{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600}
+.iv-card-store .st-dot{display:inline-block}
+.iv-card-time{font-family:'Outfit';font-size:12px;color:var(--t2)}
+.iv-card-title{font-size:14px;font-weight:600;margin-bottom:6px}
+.iv-card-plat{display:inline-flex;margin-bottom:8px}
+.iv-card-info{display:flex;gap:12px;font-size:11px;color:var(--t2);margin-bottom:10px;flex-wrap:wrap}
+.iv-card-memo{font-size:11px;color:var(--t2);background:var(--bg3);padding:8px 10px;border-radius:6px;margin-bottom:10px;line-height:1.5}
+.iv-card-actions{display:flex;gap:6px}
+.iv-btn{flex:1;padding:8px;border:1px solid var(--bd);background:none;border-radius:7px;font-size:11px;font-weight:600;color:var(--t2);transition:all .15s;text-align:center}
+.iv-btn:hover{border-color:var(--bd2);color:var(--t1)}
+.iv-btn.active{background:var(--ac);border-color:var(--ac);color:#fff}
+.iv-btn.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.iv-btn.warn{background:var(--wn);border-color:var(--wn);color:#fff}
+.iv-upload-area{margin-top:10px;padding:10px;background:var(--bg3);border:1px dashed var(--bd2);border-radius:8px}
+.iv-upload-area label{font-size:10px;color:var(--t3);margin-bottom:4px;display:block;font-weight:600}
+.iv-upload-input{width:100%;padding:7px 10px;background:var(--bg0);border:1px solid var(--bd);border-radius:6px;color:var(--t1);font-size:11px;outline:none}
+.iv-upload-input:focus{border-color:var(--ac)}
+.iv-upload-btn{margin-top:6px;padding:6px 14px;background:var(--ac);border:none;border-radius:6px;color:#fff;font-size:11px;font-weight:600}
+.iv-upload-saved{display:flex;align-items:center;gap:6px;margin-top:10px;padding:8px 10px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.15);border-radius:6px;font-size:11px;color:var(--ok);word-break:break-all}
+.iv-dday{font-family:'Outfit';font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;margin-left:6px}
+.iv-dday.today{background:var(--ac);color:#fff}
+.iv-dday.d1{background:rgba(245,158,11,.15);color:var(--wn)}
+.iv-dday.soon{background:var(--bg3);color:var(--t2)}
+.iv-dday.past{background:rgba(239,68,68,.12);color:var(--dg)}
+.iv-empty{text-align:center;padding:40px 20px;color:var(--t3)}
+.iv-empty .eico{font-size:36px;margin-bottom:8px;opacity:.5}
+
+/* Responsive */
+@media(max-width:1024px){
+  .sidebar{width:60px}.sb-item span:not(.ico){display:none}.sb-badge{display:none}.sb-logo{font-size:0;padding:16px}.sb-logo::after{content:'AP';font-size:16px}
+  .chat-p{display:none}
+  .rpt-cards,.dash-grid{grid-template-columns:repeat(2,1fr)}
+  .dash-2col{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .sidebar{display:none}
+  .store-bar{padding:8px 12px}
+  .content-body{padding:14px}
+  .cc{min-height:60px;padding:3px}
+  .dn{font-size:9px}.ev{font-size:7px;padding:1px 3px}
+  .cal-stats{display:none}
+  .rpt-cards,.dash-grid{grid-template-columns:1fr 1fr}
+  .inf-grid{grid-template-columns:1fr}
+  /* Store & Influencer view mobile */
+  .sv-stats,.inf-view-stats{grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 12px}
+  .sv-stat,.iv-stat{padding:6px 2px}
+  .sv-stat-n,.iv-stat-n{font-size:15px}
+  .sv-body,.inf-view-body{padding:10px 12px}
+  .iv-card-actions{flex-wrap:wrap}
+  .iv-btn{padding:7px 4px;font-size:10px}
+  .sv-today-banner{padding:12px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">AWESOMEPLAN</div>
+    <div class="login-sub">광고 스케줄 관리 시스템</div>
+    <input class="login-input" id="loginPw" type="password" placeholder="비밀번호 입력" maxlength="20" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">로그인</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+  <div class="sidebar">
+    <div class="sb-logo">AWESOMEPLAN</div>
+    <nav class="sb-nav">
+      <button class="sb-item active" onclick="goPage('dashboard',this)"><span class="ico">🏠</span><span>대시보드</span></button>
+      <button class="sb-item" onclick="goPage('calendar',this)"><span class="ico">📅</span><span>스케줄</span></button>
+      <button class="sb-item" onclick="goPage('influencer',this)"><span class="ico">👤</span><span>인플루언서</span></button>
+      <button class="sb-item" onclick="goPage('report',this)"><span class="ico">📊</span><span>리포트</span></button>
+      <button class="sb-item" onclick="goPage('budget',this)"><span class="ico">💰</span><span>예산</span></button>
+      <button class="sb-item" onclick="goPage('kakao',this)"><span class="ico">💬</span><span>카톡알림</span></button>
+      <button class="sb-item" onclick="goPage('stores',this)"><span class="ico">🏪</span><span>매장관리</span></button>
+    </nav>
+    <div class="sb-footer">
+      <button class="sb-item" onclick="goPage('settings',this)"><span class="ico">⚙️</span><span>설정</span></button>
+      <button class="sb-item" onclick="doLogout()"><span class="ico">🚪</span><span>잠금</span></button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- ===== DASHBOARD PAGE ===== -->
+    <div class="page active" id="pg-dashboard">
+      <div class="topbar">
+        <div class="topbar-left"><span class="page-icon">🏠</span><span class="page-name">대시보드</span></div>
+        <div class="topbar-right">
+          <button class="tb" onclick="goPage('calendar',document.querySelectorAll('.sb-nav .sb-item')[1])">📅 스케줄 보기</button>
+          <button class="tb acc" onclick="openSharePanel()">🔗 공유</button>
+        </div>
+      </div>
+      <div class="content"><div class="content-body" id="dashBody"></div></div>
+    </div>
+
+    <!-- ===== CALENDAR PAGE ===== -->
+    <div class="page" id="pg-calendar">
+      <div class="topbar">
+        <div class="topbar-left"><span class="page-icon">📅</span><span class="page-name">광고 스케줄</span></div>
+        <div class="topbar-right">
+          <button class="tb acc" onclick="openAdd()">+ 등록</button>
+          <button class="tb" onclick="openRecurring()">🔄 반복</button>
+          <button class="tb" onclick="goToday()">오늘</button>
+          <button class="tb" onclick="openSharePanel()">🔗 공유</button>
+          <button class="tb" onclick="exportCSV()">📥 CSV</button>
+        </div>
+      </div>
+      <div class="store-bar" id="storeBar"></div>
+      <div class="content">
+        <div class="content-body" style="display:flex;flex-direction:column;overflow:hidden;">
+          <div class="cal-controls">
+            <div class="mnav">
+              <button class="nbtn" onclick="chMo(-1)">◀</button>
+              <h2 id="mTitle"></h2>
+              <button class="nbtn" onclick="chMo(1)">▶</button>
+            </div>
+            <div class="cal-stats" id="calStats"></div>
+          </div>
+          <div class="plats">
+            <div class="pl"><span class="pld" style="background:var(--ig)"></span>Instagram</div>
+            <div class="pl"><span class="pld" style="background:var(--yt)"></span>YouTube</div>
+            <div class="pl"><span class="pld" style="background:var(--tt)"></span>TikTok</div>
+            <div class="pl"><span class="pld" style="background:var(--tw)"></span>Twitter</div>
+            <div class="pl"><span class="pld" style="background:var(--nv)"></span>Naver</div>
+            <div class="pl"><span class="pld" style="background:var(--fb)"></span>Facebook</div>
+          </div>
+          <div class="cal-wrap"><div class="cg" id="calGrid"></div></div>
+        </div>
+        <div class="chat-p" id="chatP">
+          <div class="chat-h">
+            <div class="chat-hl"><div class="chat-av">🤖</div><div class="chat-hi"><h3>스케줄 AI</h3><span>응답 가능</span></div></div>
+            <button class="chat-x" onclick="document.getElementById('chatP').style.display='none'">✕</button>
+          </div>
+          <div class="chat-ms" id="chatMs">
+            <div class="msg bot"><div class="mb">안녕하세요! 스케줄 관련 뭐든 물어보세요 😊<br>• "오늘 스케줄" / "이번 주"<br>• "엉클조 일정"<br>• "릴스 스케줄" / "지연 현황"<br>• "월간 요약"</div></div>
+          </div>
+          <div class="qbar">
+            <button class="qb" onclick="ask('오늘 스케줄')">📅오늘</button>
+            <button class="qb" onclick="ask('이번 주')">📋이번주</button>
+            <button class="qb" onclick="ask('지연')">⚠️지연</button>
+            <button class="qb" onclick="ask('월간 요약')">📊월간</button>
+          </div>
+          <div class="chat-ia">
+            <div class="chat-iw">
+              <textarea class="chat-in" id="chatIn" placeholder="질문 입력..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,60)+'px'"></textarea>
+              <button class="chat-sn" onclick="sendChat()">➤</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== INFLUENCER PAGE ===== -->
+    <div class="page" id="pg-influencer">
+      <div class="topbar">
+        <div class="topbar-left"><span class="page-icon">👤</span><span class="page-name">인플루언서 DB</span></div>
+        <div class="topbar-right">
+          <button class="tb acc" onclick="openInfAdd()">+ 인플루언서 추가</button>
+          <button class="tb" onclick="exportInfCSV()">📥 CSV</button>
+        </div>
+      </div>
+      <div class="content"><div class="content-body"><div class="inf-grid" id="infGrid"></div></div></div>
+    </div>
+
+    <!-- ===== REPORT PAGE ===== -->
+    <div class="page" id="pg-report">
+      <div class="topbar">
+        <div class="topbar-left"><span class="page-icon">📊</span><span class="page-name">월간 리포트</span></div>
+        <div class="topbar-right">
+          <button class="tb" onclick="chRptMo(-1)">◀ 이전</button>
+          <span style="font-size:13px;font-weight:600;color:var(--t1)" id="rptMonth"></span>
+          <button class="tb" onclick="chRptMo(1)">다음 ▶</button>
+          <button class="tb acc" onclick="exportReport()">📥 리포트 다운</button>
+        </div>
+      </div>
+      <div class="content"><div class="content-body" id="rptBody"></div></div>
+    </div>
+
+    <!-- ===== BUDGET PAGE ===== -->
+    <div class="page" id="pg-budget">
+      <div class="topbar">
+        <div class="topbar-left"><span class="page-icon">💰</span><span class="page-name">매장별 월 예산</span></div>
+        <div class="topbar-right">
+          <button class="tb" onclick="chBgtMo(-1)">◀</button>
+          <span style="font-size:13px;font-weight:600;color:var(--t1)" id="bgtMonth"></span>
+          <button class="tb" onclick="chBgtMo(1)">▶</button>
+          <button class="tb acc" onclick="openBgtEdit()">✏️ 예산 설정</button>
+        </div>
+      </div>
+      <div class="content"><div class="content-body"><div class="bgt-grid" id="bgtGrid"></div></div></div>
+    </div>
+
+    <!-- ===== KAKAO PAGE ===== -->
+    <div class="page" id="pg-kakao">
+      <div class="topbar">
+        <div class="topbar-left"><span class="page-icon">💬</span><span class="page-name">카카오톡 알림 메시지</span></div>
+        <div class="topbar-right"><button class="tb acc" onclick="genAllKakao()">🔄 전체 생성</button></div>
+      </div>
+      <div class="content"><div class="content-body" id="kakaoBody"></div></div>
+    </div>
+
+    <!-- ===== STORES PAGE ===== -->
+    <div class="page" id="pg-stores">
+      <div class="topbar">
+        <div class="topbar-left"><span class="page-icon">🏪</span><span class="page-name">매장 관리</span></div>
+        <div class="topbar-right"><button class="tb acc" onclick="openStoreAdd()">+ 매장 추가</button></div>
+      </div>
+      <div class="content"><div class="content-body">
+        <div style="font-size:11px;color:var(--t2);margin-bottom:16px;background:var(--bg3);padding:10px 14px;border-radius:8px;line-height:1.6">
+          💡 매장을 추가하면 스케줄, 예산, 리포트, 카톡알림 등 모든 기능에서 사용할 수 있습니다.
+        </div>
+        <div class="inf-grid" id="storeGrid"></div>
+      </div></div>
+    </div>
+
+    <!-- ===== SETTINGS PAGE ===== -->
+    <div class="page" id="pg-settings">
+      <div class="topbar">
+        <div class="topbar-left"><span class="page-icon">⚙️</span><span class="page-name">설정</span></div>
+        <div class="topbar-right"></div>
+      </div>
+      <div class="content"><div class="content-body">
+        <div style="max-width:500px;">
+          <div class="f"><label>비밀번호 변경</label><input class="fi" id="newPw" type="password" placeholder="새 비밀번호"></div>
+          <div class="f"><label>비밀번호 확인</label><input class="fi" id="newPw2" type="password" placeholder="새 비밀번호 확인"></div>
+          <button class="bp" style="width:auto;padding:9px 24px;" onclick="changePw()">비밀번호 변경</button>
+          <div style="margin-top:30px;padding-top:20px;border-top:1px solid var(--bd)">
+            <div class="f"><label>데이터 관리</label></div>
+            <button class="bp dg" style="width:auto;padding:9px 24px;" onclick="if(confirm('정말 모든 데이터를 초기화하시겠습니까?')){localStorage.clear();location.reload()}">전체 초기화</button>
+          </div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- STORE VIEW (매장 전용 화면) -->
+<div class="store-view" id="storeView">
+  <div class="sv-head">
+    <div class="sv-logo">AWESOMEPLAN</div>
+    <div class="sv-store-info">
+      <div class="sv-store-dot" id="svDot"></div>
+      <div>
+        <div class="sv-store-name" id="svName"></div>
+        <div class="sv-store-sub" id="svSub"></div>
+      </div>
+    </div>
+  </div>
+  <div class="sv-stats" id="svStats"></div>
+  <div class="sv-tabs">
+    <button class="sv-tab on" onclick="svFilter('today',this)">오늘</button>
+    <button class="sv-tab" onclick="svFilter('upcoming',this)">예정</button>
+    <button class="sv-tab" onclick="svFilter('all',this)">전체</button>
+    <button class="sv-tab" onclick="svFilter('done',this)">완료</button>
+  </div>
+  <div class="sv-body" id="svBody"></div>
+</div>
+
+<!-- INFLUENCER VIEW (릴서 전용 화면) -->
+<div class="inf-view" id="infView">
+  <div class="inf-view-head">
+    <div class="inf-view-logo">AWESOMEPLAN</div>
+    <div class="inf-view-profile">
+      <div class="inf-view-avi">📸</div>
+      <div>
+        <div class="inf-view-name" id="ivName"></div>
+        <div class="inf-view-handle" id="ivHandle"></div>
+        <div class="inf-view-meta" id="ivMeta"></div>
+      </div>
+    </div>
+  </div>
+  <div class="inf-view-stats" id="ivStats"></div>
+  <div class="inf-view-tabs">
+    <button class="iv-tab on" onclick="ivFilter('upcoming',this)">예정</button>
+    <button class="iv-tab" onclick="ivFilter('all',this)">전체</button>
+    <button class="iv-tab" onclick="ivFilter('done',this)">완료</button>
+    <button class="iv-tab" onclick="ivFilter('earnings',this)">정산</button>
+  </div>
+  <div class="inf-view-body" id="ivBody"></div>
+</div>
+
+<!-- MODALS -->
+<!-- Detail -->
+<div class="ov" id="detOv" onclick="if(event.target===this)closeDet()">
+  <div class="modal"><div class="modal-t"><h3 id="detTi">상세</h3><button class="mx" onclick="closeDet()">✕</button></div>
+  <div class="modal-b" id="detBd"></div>
+  <div class="modal-a"><button class="bs" onclick="closeDet()">닫기</button><button class="bp dg" onclick="delEv()">삭제</button><button class="bp" onclick="editDet()">수정</button></div></div>
+</div>
+<!-- Add/Edit -->
+<div class="ov" id="addOv" onclick="if(event.target===this)closeAdd()">
+  <div class="modal"><div class="modal-t"><h3 id="addTi">등록</h3><button class="mx" onclick="closeAdd()">✕</button></div>
+  <div class="modal-b">
+    <div class="f"><label>매장</label><select class="fi" id="fSt"></select></div>
+    <div class="f"><label>플랫폼</label><select class="fi" id="fPl"><option value="instagram">Instagram Reels</option><option value="youtube">YouTube Shorts</option><option value="tiktok">TikTok</option><option value="twitter">Twitter/X</option><option value="naver">Naver Blog</option><option value="facebook">Facebook</option></select></div>
+    <div class="f"><label>콘텐츠 제목</label><input class="fi" id="fTi" placeholder="예: 소시지 브런치 릴스"></div>
+    <div class="f-row"><div class="f"><label>날짜</label><input class="fi" id="fDt" type="date"></div><div class="f"><label>시간</label><input class="fi" id="fTm" type="time" value="18:00"></div></div>
+    <div class="f"><label>인플루언서</label>
+      <select class="fi" id="fInf">
+        <option value="">직접 입력 또는 선택</option>
+      </select>
+    </div>
+    <div class="f" id="fInfCustomWrap" style="display:none"><label>인플루언서 핸들 직접입력</label><input class="fi" id="fInfCustom" placeholder="@handle"></div>
+    <div class="f"><label>상태</label><select class="fi" id="fSts"><option value="scheduled">예정</option><option value="progress">진행중</option><option value="review">검토중</option><option value="done">완료</option><option value="cancelled">취소</option></select></div>
+    <div class="f-row">
+      <div class="f"><label>조회수</label><input class="fi" id="fViews" type="number" placeholder="0"></div>
+      <div class="f"><label>좋아요</label><input class="fi" id="fLikes" type="number" placeholder="0"></div>
+      <div class="f"><label>댓글</label><input class="fi" id="fComments" type="number" placeholder="0"></div>
+    </div>
+    <div class="f"><label>비용 (원)</label><input class="fi" id="fCost" type="number" placeholder="0"></div>
+    <div class="f"><label>메모</label><textarea class="fi" id="fMemo" rows="2" placeholder="추가 메모..."></textarea></div>
+  </div>
+  <div class="modal-a"><button class="bs" onclick="closeAdd()">취소</button><button class="bp" onclick="saveEv()">저장</button></div></div>
+</div>
+<!-- Recurring -->
+<div class="ov" id="recOv" onclick="if(event.target===this)closeRec()">
+  <div class="modal"><div class="modal-t"><h3>🔄 반복 스케줄 등록</h3><button class="mx" onclick="closeRec()">✕</button></div>
+  <div class="modal-b">
+    <div class="f"><label>매장</label><select class="fi" id="rSt"></select></div>
+    <div class="f"><label>플랫폼</label><select class="fi" id="rPl"><option value="instagram">Instagram Reels</option><option value="youtube">YouTube Shorts</option><option value="tiktok">TikTok</option><option value="twitter">Twitter/X</option><option value="naver">Naver Blog</option><option value="facebook">Facebook</option></select></div>
+    <div class="f"><label>콘텐츠 제목</label><input class="fi" id="rTi" placeholder="예: 주간 릴스"></div>
+    <div class="f"><label>반복 요일</label>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--t2);cursor:pointer"><input type="checkbox" value="0" class="r-day"> 일</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--t2);cursor:pointer"><input type="checkbox" value="1" class="r-day"> 월</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--t2);cursor:pointer"><input type="checkbox" value="2" class="r-day"> 화</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--t2);cursor:pointer"><input type="checkbox" value="3" class="r-day"> 수</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--t2);cursor:pointer"><input type="checkbox" value="4" class="r-day"> 목</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--t2);cursor:pointer"><input type="checkbox" value="5" class="r-day"> 금</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--t2);cursor:pointer"><input type="checkbox" value="6" class="r-day"> 토</label>
+      </div>
+    </div>
+    <div class="f"><label>시간</label><input class="fi" id="rTm" type="time" value="18:00"></div>
+    <div class="f-row"><div class="f"><label>시작일</label><input class="fi" id="rFrom" type="date"></div><div class="f"><label>종료일</label><input class="fi" id="rTo" type="date"></div></div>
+    <div class="f"><label>인플루언서</label><input class="fi" id="rInf" placeholder="@handle (선택)"></div>
+  </div>
+  <div class="modal-a"><button class="bs" onclick="closeRec()">취소</button><button class="bp" onclick="saveRec()">일괄 등록</button></div></div>
+</div>
+<!-- Influencer Add -->
+<div class="ov" id="infOv" onclick="if(event.target===this)closeInfAdd()">
+  <div class="modal"><div class="modal-t"><h3 id="infAddTi">인플루언서 추가</h3><button class="mx" onclick="closeInfAdd()">✕</button></div>
+  <div class="modal-b">
+    <div class="f"><label>이름/닉네임</label><input class="fi" id="iName" placeholder="예: 먹방의달인"></div>
+    <div class="f"><label>핸들</label><input class="fi" id="iHandle" placeholder="예: @foodie_kim"></div>
+    <div class="f"><label>카테고리</label><select class="fi" id="iCat"><option>먹방/맛집</option><option>라이프스타일</option><option>뷰티</option><option>여행</option><option>일상브이로그</option><option>기타</option></select></div>
+    <div class="f"><label>주요 플랫폼 (쉼표 구분)</label><input class="fi" id="iPlats" placeholder="instagram, tiktok, youtube"></div>
+    <div class="f-row"><div class="f"><label>팔로워 수</label><input class="fi" id="iFollowers" type="number" placeholder="0"></div><div class="f"><label>평균 조회수</label><input class="fi" id="iAvgViews" type="number" placeholder="0"></div></div>
+    <div class="f"><label>1건 단가 (원)</label><input class="fi" id="iRate" type="number" placeholder="0"></div>
+    <div class="f"><label>연락처/메모</label><textarea class="fi" id="iMemo" rows="2" placeholder="카톡ID, 연락처, 특이사항 등"></textarea></div>
+  </div>
+  <div class="modal-a"><button class="bs" onclick="closeInfAdd()">취소</button><button class="bp" onclick="saveInf()">저장</button></div></div>
+</div>
+<!-- Budget Edit -->
+<div class="ov" id="bgtOv" onclick="if(event.target===this)closeBgtEdit()">
+  <div class="modal"><div class="modal-t"><h3>💰 매장별 월 예산 설정</h3><button class="mx" onclick="closeBgtEdit()">✕</button></div>
+  <div class="modal-b" id="bgtEditBody"></div>
+  <div class="modal-a"><button class="bs" onclick="closeBgtEdit()">취소</button><button class="bp" onclick="saveBgt()">저장</button></div></div>
+</div>
+<!-- Store Add/Edit -->
+<div class="ov" id="storeOv" onclick="if(event.target===this)closeStoreAdd()">
+  <div class="modal"><div class="modal-t"><h3 id="storeAddTi">매장 추가</h3><button class="mx" onclick="closeStoreAdd()">✕</button></div>
+  <div class="modal-b">
+    <div class="f"><label>매장명 (전체 이름)</label><input class="fi" id="sName" placeholder="예: 동백가옥 연남점"></div>
+    <div class="f"><label>약칭 (캘린더 표시용, 2~4글자)</label><input class="fi" id="sShort" placeholder="예: 동백연남" maxlength="6"></div>
+    <div class="f"><label>매장 ID (영문, 수정 불가)</label><input class="fi" id="sId" placeholder="자동생성" readonly style="opacity:.6"></div>
+    <div class="f"><label>색상</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+        <label class="color-opt"><input type="radio" name="sColor" value="#f59e0b" checked><span style="background:#f59e0b"></span></label>
+        <label class="color-opt"><input type="radio" name="sColor" value="#ec4899"><span style="background:#ec4899"></span></label>
+        <label class="color-opt"><input type="radio" name="sColor" value="#f472b6"><span style="background:#f472b6"></span></label>
+        <label class="color-opt"><input type="radio" name="sColor" value="#fb7185"><span style="background:#fb7185"></span></label>
+        <label class="color-opt"><input type="radio" name="sColor" value="#a78bfa"><span style="background:#a78bfa"></span></label>
+        <label class="color-opt"><input type="radio" name="sColor" value="#60a5fa"><span style="background:#60a5fa"></span></label>
+        <label class="color-opt"><input type="radio" name="sColor" value="#34d399"><span style="background:#34d399"></span></label>
+        <label class="color-opt"><input type="radio" name="sColor" value="#f87171"><span style="background:#f87171"></span></label>
+        <label class="color-opt"><input type="radio" name="sColor" value="#fbbf24"><span style="background:#fbbf24"></span></label>
+        <label class="color-opt"><input type="radio" name="sColor" value="#38bdf8"><span style="background:#38bdf8"></span></label>
+        <label class="color-opt"><input type="radio" name="sColor" value="#4ade80"><span style="background:#4ade80"></span></label>
+        <label class="color-opt"><input type="radio" name="sColor" value="#c084fc"><span style="background:#c084fc"></span></label>
+        <label class="color-opt"><input type="radio" name="sColor" value="#fb923c"><span style="background:#fb923c"></span></label>
+        <label class="color-opt"><input type="radio" name="sColor" value="#e879f9"><span style="background:#e879f9"></span></label>
+        <label class="color-opt"><input type="radio" name="sColor" value="#22d3ee"><span style="background:#22d3ee"></span></label>
+      </div>
+    </div>
+    <div class="f"><label>월 예산 (원, 선택)</label><input class="fi" id="sBudget" type="number" placeholder="예: 1000000"></div>
+  </div>
+  <div class="modal-a"><button class="bs" onclick="closeStoreAdd()">취소</button><button class="bp" onclick="saveStore()">저장</button></div></div>
+</div>
+<!-- Share -->
+<div class="ov" id="shareOv" onclick="if(event.target===this)closeShare()">
+  <div class="modal" style="width:560px;"><div class="modal-t"><h3>🔗 공유 링크 관리</h3><button class="mx" onclick="closeShare()">✕</button></div>
+  <div class="modal-b" style="padding:14px 20px">
+    <div style="font-size:10px;color:var(--t2);margin-bottom:12px;background:var(--bg3);padding:8px 12px;border-radius:7px;line-height:1.5">💡 각 링크를 복사해서 해당 담당자/릴서에게 카톡으로 전달하세요. 각자 본인 화면만 볼 수 있습니다.</div>
+    <div id="shareLinkList"></div>
+  </div></div>
+</div>
+
+<script>
+// ============ CONFIG ============
+let STORES={};
+const DEFAULT_STORES={
+  unclejoe:{name:'엉클조소시지 삼각지점',color:'#f59e0b',short:'엉클조'},
+  dongbaek_yeonnam:{name:'동백가옥 연남점',color:'#ec4899',short:'동백연남'},
+  dongbaek_yongsan:{name:'동백가옥 용산점',color:'#f472b6',short:'동백용산'},
+  dongbaek_hapjeong:{name:'동백가옥 합정점',color:'#fb7185',short:'동백합정'},
+  ninniku:{name:'닌니쿠요코초 용산점',color:'#a78bfa',short:'닌니쿠'},
+  dudungtan:{name:'두둥탄 용산점',color:'#60a5fa',short:'두둥탄'},
+  yongsanpogu:{name:'용산포구',color:'#34d399',short:'용산포구'}
+};
+function loadStores(){const s=localStorage.getItem('ap_stores');if(s){STORES=JSON.parse(s)}else{STORES={...DEFAULT_STORES};saveStores()}}
+function saveStores(){localStorage.setItem('ap_stores',JSON.stringify(STORES))}
+const PLATS={instagram:{n:'IG Reels',f:'Instagram Reels'},youtube:{n:'YT Shorts',f:'YouTube Shorts'},tiktok:{n:'TikTok',f:'TikTok'},twitter:{n:'X/Twitter',f:'Twitter/X'},naver:{n:'Naver',f:'Naver Blog'},facebook:{n:'Facebook',f:'Facebook'}};
+const STAT={scheduled:'예정',progress:'진행중',done:'완료',review:'검토중',cancelled:'취소'};
+const DN=['일','월','화','수','목','금','토'];
+
+// ============ STATE ============
+let data=[],influencers=[],budgets={};
+let curY=2026,curM=2,curSt='all',editId=null,detId=null,infEditId=null;
+let rptY=2026,rptM=2,bgtY=2026,bgtM=2;
+let idc=100,infc=100;
+let isClientView=false,isInfView=false,isStoreView=false;
+let ivHandle='',ivFilterMode='upcoming';
+let svStoreKey='',svFilterMode='today';
+
+// ============ AUTH ============
+const DEFAULT_PW='1234';
+function getPw(){return localStorage.getItem('ap_pw')||DEFAULT_PW}
+function checkAuth(){
+  if(sessionStorage.getItem('ap_auth')==='1'){
+    document.getElementById('loginScreen').classList.add('hidden');
+  }
+}
+function doLogin(){
+  const pw=document.getElementById('loginPw').value;
+  if(pw===getPw()){sessionStorage.setItem('ap_auth','1');document.getElementById('loginScreen').classList.add('hidden');document.getElementById('loginErr').textContent=''}
+  else{document.getElementById('loginErr').textContent='비밀번호가 틀렸습니다.'}
+}
+function doLogout(){sessionStorage.removeItem('ap_auth');document.getElementById('loginScreen').classList.remove('hidden');document.getElementById('loginPw').value=''}
+function changePw(){
+  const a=document.getElementById('newPw').value,b=document.getElementById('newPw2').value;
+  if(!a){alert('비밀번호를 입력하세요.');return}
+  if(a!==b){alert('비밀번호가 일치하지 않습니다.');return}
+  localStorage.setItem('ap_pw',a);alert('비밀번호가 변경되었습니다.');
+  document.getElementById('newPw').value='';document.getElementById('newPw2').value='';
+}
+
+// ============ STORAGE ============
+function save(){localStorage.setItem('ap_data',JSON.stringify(data))}
+function saveInfs(){localStorage.setItem('ap_infs',JSON.stringify(influencers))}
+function saveBgts(){localStorage.setItem('ap_bgts',JSON.stringify(budgets))}
+function load(){
+  const d=localStorage.getItem('ap_data');
+  if(d){data=JSON.parse(d);idc=Math.max(...data.map(x=>x.id),100)+1}else seedData();
+  const i=localStorage.getItem('ap_infs');
+  if(i){influencers=JSON.parse(i);infc=Math.max(...influencers.map(x=>x.id),100)+1}else seedInf();
+  const b=localStorage.getItem('ap_bgts');
+  if(b)budgets=JSON.parse(b);else seedBgt();
+}
+function seedData(){
+  data=[
+    {id:1,store:'unclejoe',platform:'instagram',title:'소시지 브런치 릴스',date:'2026-02-24',time:'18:00',influencer:'@foodie_kim',status:'scheduled',memo:'브런치 세트 클로즈업',views:0,likes:0,comments:0,cost:150000,uploadUrl:''},
+    {id:2,store:'unclejoe',platform:'youtube',title:'카레소시지 먹방',date:'2026-02-25',time:'19:00',influencer:'@mukbang_pro',status:'progress',memo:'편집 중',views:0,likes:0,comments:0,cost:200000,uploadUrl:''},
+    {id:3,store:'unclejoe',platform:'tiktok',title:'소시지 ASMR',date:'2026-02-26',time:'12:00',influencer:'@asmr_chef',status:'scheduled',memo:'',views:0,likes:0,comments:0,cost:100000,uploadUrl:''},
+    {id:4,store:'unclejoe',platform:'naver',title:'삼각지 맛집 블로그',date:'2026-02-27',time:'10:00',influencer:'@taste_seoul',status:'scheduled',memo:'',views:0,likes:0,comments:0,cost:80000,uploadUrl:''},
+    {id:5,store:'dongbaek_yeonnam',platform:'instagram',title:'한옥 분위기 릴스',date:'2026-02-24',time:'20:00',influencer:'@foodie_kim',status:'done',memo:'',views:45200,likes:3200,comments:180,cost:200000,uploadUrl:'https://www.instagram.com/reel/example1'},
+    {id:6,store:'dongbaek_yeonnam',platform:'tiktok',title:'전통주 페어링',date:'2026-02-26',time:'17:00',influencer:'@asmr_chef',status:'review',memo:'자막 수정',views:0,likes:0,comments:0,cost:150000,uploadUrl:''},
+    {id:7,store:'dongbaek_yongsan',platform:'instagram',title:'용산점 인테리어 릴스',date:'2026-02-25',time:'14:00',influencer:'@mukbang_pro',status:'scheduled',memo:'',views:0,likes:0,comments:0,cost:180000,uploadUrl:''},
+    {id:8,store:'dongbaek_hapjeong',platform:'instagram',title:'합정점 오픈 릴스',date:'2026-02-28',time:'18:00',influencer:'@taste_seoul',status:'scheduled',memo:'오픈 이벤트',views:0,likes:0,comments:0,cost:200000,uploadUrl:''},
+    {id:9,store:'ninniku',platform:'instagram',title:'마늘요리 릴스',date:'2026-02-25',time:'20:00',influencer:'@foodie_kim',status:'scheduled',memo:'',views:0,likes:0,comments:0,cost:150000,uploadUrl:''},
+    {id:10,store:'ninniku',platform:'tiktok',title:'이자카야 분위기',date:'2026-02-27',time:'21:00',influencer:'@izakaya_kr',status:'progress',memo:'편집 중',views:0,likes:0,comments:0,cost:120000,uploadUrl:''},
+    {id:11,store:'dudungtan',platform:'instagram',title:'탄두리치킨 릴스',date:'2026-02-26',time:'19:00',influencer:'@mukbang_pro',status:'scheduled',memo:'',views:0,likes:0,comments:0,cost:180000,uploadUrl:''},
+    {id:12,store:'dudungtan',platform:'youtube',title:'시그니처 숏츠',date:'2026-02-28',time:'14:00',influencer:'@asmr_chef',status:'scheduled',memo:'',views:0,likes:0,comments:0,cost:200000,uploadUrl:''},
+    {id:13,store:'yongsanpogu',platform:'instagram',title:'회 모듬 릴스',date:'2026-02-24',time:'12:00',influencer:'@taste_seoul',status:'done',memo:'',views:32100,likes:2100,comments:95,cost:150000,uploadUrl:'https://www.instagram.com/reel/example2'},
+    {id:14,store:'yongsanpogu',platform:'naver',title:'용산 횟집 블로그',date:'2026-02-25',time:'10:00',influencer:'@izakaya_kr',status:'progress',memo:'초안 작성 중',views:0,likes:0,comments:0,cost:80000,uploadUrl:''},
+    {id:15,store:'yongsanpogu',platform:'tiktok',title:'활어회 ASMR',date:'2026-02-27',time:'18:00',influencer:'@foodie_kim',status:'scheduled',memo:'',views:0,likes:0,comments:0,cost:120000,uploadUrl:''},
+  ];idc=16;save();
+}
+function seedInf(){
+  influencers=[
+    {id:1,name:'김푸디',handle:'@foodie_kim',category:'먹방/맛집',platforms:['instagram','tiktok'],followers:52000,avgViews:15000,rate:150000,memo:'카톡: foodiekim'},
+    {id:2,name:'먹방프로',handle:'@mukbang_pro',category:'먹방/맛집',platforms:['youtube','instagram'],followers:180000,avgViews:45000,rate:300000,memo:'매니저 연락: 010-xxxx'},
+    {id:3,name:'ASMR셰프',handle:'@asmr_chef',category:'먹방/맛집',platforms:['tiktok','youtube'],followers:95000,avgViews:28000,rate:200000,memo:'ASMR 전문'},
+    {id:4,name:'맛서울',handle:'@taste_seoul',category:'먹방/맛집',platforms:['naver','instagram'],followers:35000,avgViews:8000,rate:80000,memo:'블로그 전문'},
+    {id:5,name:'이자카야맨',handle:'@izakaya_kr',category:'라이프스타일',platforms:['tiktok','instagram'],followers:42000,avgViews:12000,rate:120000,memo:'일식 전문'},
+  ];infc=6;saveInfs();
+}
+function seedBgt(){
+  Object.keys(STORES).forEach(k=>{budgets[k]={monthly:1000000}});
+  if(budgets.unclejoe)budgets.unclejoe.monthly=1500000;
+  if(budgets.dongbaek_yeonnam)budgets.dongbaek_yeonnam.monthly=1200000;
+  if(budgets.ninniku)budgets.ninniku.monthly=800000;
+  saveBgts();
+}
+
+// ============ HELPERS ============
+function td(){const t=new Date();return `${t.getFullYear()}-${S(t.getMonth()+1)}-${S(t.getDate())}`}
+function S(n){return String(n).padStart(2,'0')}
+function fmt(n){return n?n.toLocaleString('ko-KR'):'0'}
+function now(){const t=new Date(),h=t.getHours(),m=S(t.getMinutes());return `${h<12?'오전':'오후'} ${h%12||12}:${m}`}
+function dday(dateStr){const t=new Date(td()),d=new Date(dateStr);return Math.round((d-t)/(1000*60*60*24))}
+function ddayText(n){if(n===0)return'TODAY';if(n===1)return'D-1';if(n>1)return`D-${n}`;return`D+${Math.abs(n)}`}
+function ddayClass(n){if(n===0)return'today';if(n===1)return'd1';if(n>1)return'soon';return'past'}
+function tmrwStr(){const t=new Date();t.setDate(t.getDate()+1);return `${t.getFullYear()}-${S(t.getMonth()+1)}-${S(t.getDate())}`}
+
+// ============ NAVIGATION ============
+function goPage(p,el){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById('pg-'+p).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(x=>x.classList.remove('active'));
+  if(el)el.classList.add('active');
+  if(p==='dashboard')renderDash();
+  if(p==='influencer')renderInfs();
+  if(p==='report')renderRpt();
+  if(p==='budget')renderBgt();
+  if(p==='kakao')renderKakao();
+  if(p==='stores')renderStores();
+}
+
+// ============ DASHBOARD ============
+function renderDash(){
+  const t=td(),tmrw=tmrwStr();
+  const allEvs=data;
+  const todayEvs=allEvs.filter(e=>e.date===t).sort((a,b)=>a.time.localeCompare(b.time));
+  const tmrwEvs=allEvs.filter(e=>e.date===tmrw).sort((a,b)=>a.time.localeCompare(b.time));
+  const upcomingEvs=allEvs.filter(e=>e.date>t&&e.status!=='done'&&e.status!=='cancelled').sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time));
+  const overdue=allEvs.filter(e=>e.date<t&&(e.status==='scheduled'||e.status==='progress'));
+  const thisMonth=allEvs.filter(e=>{const d=new Date(e.date);return d.getMonth()===new Date().getMonth()&&d.getFullYear()===new Date().getFullYear()});
+  const totalCostMonth=thisMonth.reduce((a,e)=>a+(e.cost||0),0);
+  const doneMonth=thisMonth.filter(e=>e.status==='done').length;
+  const pendMonth=thisMonth.filter(e=>e.status!=='done'&&e.status!=='cancelled').length;
+
+  let h=`<div class="dash-grid">
+    <div class="dash-card"><div class="dash-card-label">오늘 스케줄</div><div class="dash-card-num" style="color:var(--ac)">${todayEvs.length}</div><div class="dash-card-sub">${todayEvs.filter(e=>e.status==='done').length}건 완료</div></div>
+    <div class="dash-card"><div class="dash-card-label">이번달 총 건수</div><div class="dash-card-num">${thisMonth.length}</div><div class="dash-card-sub">완료 ${doneMonth} / 대기 ${pendMonth}</div></div>
+    <div class="dash-card"><div class="dash-card-label">이번달 비용</div><div class="dash-card-num" style="font-size:22px">${fmt(totalCostMonth)}원</div><div class="dash-card-sub">건당 ${thisMonth.length?fmt(Math.round(totalCostMonth/thisMonth.length)):0}원</div></div>
+    <div class="dash-card"><div class="dash-card-label">지연 건수</div><div class="dash-card-num" style="color:${overdue.length?'var(--dg)':'var(--ok)'}">${overdue.length}</div><div class="dash-card-sub">${overdue.length?'즉시 확인 필요':'지연 없음'}</div></div>
+  </div>`;
+
+  // Alerts
+  if(overdue.length){
+    h+=`<div style="margin-bottom:16px">`;
+    overdue.slice(0,3).forEach(e=>{
+      h+=`<div class="dash-alert"><span class="alert-ico">🚨</span><span><b>${STORES[e.store]?.short}</b> ${e.title} (${e.date}) - ${e.influencer||'미배정'} 지연중</span></div>`;
+    });
+    if(overdue.length>3)h+=`<div style="font-size:11px;color:var(--dg);padding:4px 0">...외 ${overdue.length-3}건 지연</div>`;
+    h+=`</div>`;
+  }
+
+  h+=`<div class="dash-2col">`;
+
+  // Today
+  h+=`<div class="dash-section"><h3>📅 오늘 스케줄 <span class="cnt">${todayEvs.length}</span></h3>`;
+  if(todayEvs.length){
+    todayEvs.forEach(e=>{
+      h+=`<div class="dash-row"><span class="time">${e.time}</span><span class="store"><span class="st-dot" style="background:${STORES[e.store]?.color};display:inline-block"></span>${STORES[e.store]?.short}</span><span class="title">${e.title}</span><span class="inf">${e.influencer||'-'}</span><span class="stag ${e.status}">${STAT[e.status]}</span></div>`;
+    });
+  }else{h+=`<div style="text-align:center;padding:20px;color:var(--t3);font-size:12px">오늘 스케줄 없음</div>`}
+  h+=`</div>`;
+
+  // Tomorrow
+  h+=`<div class="dash-section"><h3>📋 내일 스케줄 <span class="cnt">${tmrwEvs.length}</span></h3>`;
+  if(tmrwEvs.length){
+    tmrwEvs.forEach(e=>{
+      h+=`<div class="dash-row"><span class="time">${e.time}</span><span class="store"><span class="st-dot" style="background:${STORES[e.store]?.color};display:inline-block"></span>${STORES[e.store]?.short}</span><span class="title">${e.title}</span><span class="inf">${e.influencer||'-'}</span><span class="stag ${e.status}">${STAT[e.status]}</span></div>`;
+    });
+  }else{h+=`<div style="text-align:center;padding:20px;color:var(--t3);font-size:12px">내일 스케줄 없음</div>`}
+  h+=`</div>`;
+
+  h+=`</div>`;
+
+  // Upcoming 7 days
+  const w7=new Date();w7.setDate(w7.getDate()+7);
+  const w7s=`${w7.getFullYear()}-${S(w7.getMonth()+1)}-${S(w7.getDate())}`;
+  const next7=upcomingEvs.filter(e=>e.date<=w7s).slice(0,10);
+  if(next7.length){
+    h+=`<div class="dash-section"><h3>🗓️ 향후 7일 <span class="cnt">${next7.length}</span></h3>`;
+    next7.forEach(e=>{
+      const dd=dday(e.date);
+      h+=`<div class="dash-row"><span class="time">${e.date.slice(5)} ${e.time}</span><span class="store"><span class="st-dot" style="background:${STORES[e.store]?.color};display:inline-block"></span>${STORES[e.store]?.short}</span><span class="title">${e.title}</span><span class="inf">${e.influencer||'-'}</span><span class="iv-dday ${ddayClass(dd)}">${ddayText(dd)}</span></div>`;
+    });
+    h+=`</div>`;
+  }
+
+  // Upload status - recent completions
+  const recentDone=allEvs.filter(e=>e.status==='done').sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  if(recentDone.length){
+    h+=`<div class="dash-section"><h3>✅ 최근 완료 & 업로드 현황</h3>`;
+    recentDone.forEach(e=>{
+      const hasUrl=e.uploadUrl&&e.uploadUrl.trim();
+      h+=`<div class="dash-row"><span class="time">${e.date.slice(5)}</span><span class="store"><span class="st-dot" style="background:${STORES[e.store]?.color};display:inline-block"></span>${STORES[e.store]?.short}</span><span class="title">${e.title}</span><span class="inf">${e.influencer||'-'}</span>${hasUrl?`<a href="${e.uploadUrl}" target="_blank" style="color:var(--ac);font-size:10px;text-decoration:none">🔗 업로드됨</a>`:`<span style="color:var(--wn);font-size:10px">⏳ 업로드 대기</span>`}</div>`;
+    });
+    h+=`</div>`;
+  }
+
+  document.getElementById('dashBody').innerHTML=h;
+}
+
+// ============ STORE MANAGEMENT ============
+let storeEditKey=null;
+function renderStores(){
+  const g=document.getElementById('storeGrid');
+  const keys=Object.keys(STORES);
+  if(!keys.length){g.innerHTML='<div class="empty"><div class="eico">🏪</div><p>등록된 매장이 없습니다.</p></div>';return}
+  g.innerHTML=keys.map(k=>{
+    const s=STORES[k];
+    const evCnt=data.filter(e=>e.store===k).length;
+    const upcoming=data.filter(e=>e.store===k&&e.date>=td()&&e.status!=='done'&&e.status!=='cancelled').length;
+    const totalCost=data.filter(e=>e.store===k).reduce((a,e)=>a+(e.cost||0),0);
+    return `<div class="inf-card">
+      <div class="inf-top">
+        <div class="inf-avi" style="background:${s.color}30;font-size:16px">🏪</div>
+        <div><div class="inf-name">${s.name}</div><div class="inf-handle" style="color:${s.color}">${s.short} · ${k}</div></div>
+      </div>
+      <div class="inf-stats">
+        <div class="inf-st"><div class="inf-st-n">${evCnt}</div><div class="inf-st-l">총 콘텐츠</div></div>
+        <div class="inf-st"><div class="inf-st-n">${upcoming}</div><div class="inf-st-l">예정</div></div>
+        <div class="inf-st"><div class="inf-st-n">${fmt(budgets[k]?.monthly||0)}원</div><div class="inf-st-l">월 예산</div></div>
+      </div>
+      <div style="font-size:10px;color:var(--t2)">누적 비용: ${fmt(totalCost)}원</div>
+      <div class="inf-actions">
+        <button class="inf-btn" onclick="editStore('${k}')">✏️ 수정</button>
+        <button class="inf-btn" onclick="deleteStore('${k}')">🗑️ 삭제</button>
+        <button class="inf-btn primary" onclick="setSt('${k}');goPage('calendar',document.querySelectorAll('.sb-nav .sb-item')[1])">📅 스케줄</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function nameToId(name){return name.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9가-힣_]/g,'').toLowerCase().substring(0,30)||'store_'+Date.now()}
+function openStoreAdd(){
+  storeEditKey=null;
+  document.getElementById('storeAddTi').textContent='매장 추가';
+  document.getElementById('sName').value='';document.getElementById('sShort').value='';document.getElementById('sId').value='';document.getElementById('sId').style.opacity='.6';document.getElementById('sBudget').value='';
+  document.querySelector('input[name="sColor"][value="#f59e0b"]').checked=true;
+  document.getElementById('sName').oninput=function(){
+    if(!storeEditKey){document.getElementById('sId').value=nameToId(this.value);if(!document.getElementById('sShort').dataset.manual){const v=this.value.trim();document.getElementById('sShort').value=v.length>4?v.substring(0,4):v}}
+  };
+  document.getElementById('sShort').oninput=function(){this.dataset.manual='1'};
+  document.getElementById('storeOv').classList.add('show');
+}
+function editStore(key){
+  const s=STORES[key];if(!s)return;storeEditKey=key;
+  document.getElementById('storeAddTi').textContent='매장 수정';
+  document.getElementById('sName').value=s.name;document.getElementById('sShort').value=s.short;document.getElementById('sId').value=key;document.getElementById('sId').style.opacity='.4';document.getElementById('sBudget').value=budgets[key]?.monthly||'';
+  const cr=document.querySelector(`input[name="sColor"][value="${s.color}"]`);if(cr)cr.checked=true;
+  document.getElementById('storeOv').classList.add('show');
+}
+function closeStoreAdd(){document.getElementById('storeOv').classList.remove('show');storeEditKey=null;document.getElementById('sShort').dataset.manual=''}
+function saveStore(){
+  const name=document.getElementById('sName').value.trim(),short=document.getElementById('sShort').value.trim();
+  const color=document.querySelector('input[name="sColor"]:checked')?.value||'#f59e0b';
+  const budget=parseInt(document.getElementById('sBudget').value)||0;
+  if(!name){alert('매장명을 입력하세요.');return}
+  if(!short){alert('약칭을 입력하세요.');return}
+  let key;
+  if(storeEditKey){key=storeEditKey;STORES[key].name=name;STORES[key].short=short;STORES[key].color=color}
+  else{key=document.getElementById('sId').value||nameToId(name);if(STORES[key])key=key+'_'+Date.now().toString().slice(-4);STORES[key]={name,short,color}}
+  if(!budgets[key])budgets[key]={};budgets[key].monthly=budget;saveBgts();
+  saveStores();closeStoreAdd();renderStores();renderST();renderCal();
+}
+function deleteStore(key){
+  const s=STORES[key];if(!s)return;
+  const evCnt=data.filter(e=>e.store===key).length;
+  if(!confirm(`"${s.name}" 매장을 삭제하시겠습니까?${evCnt?`\n\n⚠️ ${evCnt}건의 스케줄이 있습니다.`:''}`))return;
+  delete STORES[key];delete budgets[key];saveStores();saveBgts();
+  if(curSt===key)curSt='all';renderStores();renderST();renderCal();
+}
+
+// ============ STORE TABS ============
+function renderST(){
+  const bar=document.getElementById('storeBar');
+  const cnts={};const t=td();
+  data.forEach(e=>{if(e.date>=t&&e.status!=='done'&&e.status!=='cancelled')cnts[e.store]=(cnts[e.store]||0)+1});
+  const tot=Object.values(cnts).reduce((a,b)=>a+b,0);
+  let h=`<button class="st${curSt==='all'?' on':''}" onclick="setSt('all')">전체 <span class="st-cnt">${tot}</span></button>`;
+  Object.entries(STORES).forEach(([k,v])=>{
+    h+=`<button class="st${curSt===k?' on':''}" onclick="setSt('${k}')"><span class="st-dot" style="background:${v.color}"></span>${v.name}${cnts[k]?` <span class="st-cnt">${cnts[k]}</span>`:''}</button>`;
+  });
+  bar.innerHTML=h;
+}
+function setSt(s){curSt=s;renderST();renderCal()}
+
+// ============ CALENDAR ============
+function renderCal(){
+  const g=document.getElementById('calGrid');
+  const ds=[['일','sun'],['월',''],['화',''],['수',''],['목',''],['금',''],['토','sat']];
+  let h=ds.map(([d,c])=>`<div class="ch ${c}">${d}</div>`).join('');
+  const f1=new Date(curY,curM,1).getDay();const dim=new Date(curY,curM+1,0).getDate();const pdim=new Date(curY,curM,0).getDate();const t=td();
+  for(let i=f1-1;i>=0;i--)h+=`<div class="cc oth"><div class="dn">${pdim-i}</div></div>`;
+  for(let d=1;d<=dim;d++){
+    const ds2=`${curY}-${S(curM+1)}-${S(d)}`;const isT=ds2===t;const dow=(f1+d-1)%7;
+    const cls=`cc${isT?' tod':''}${dow===0?' sun':''}${dow===6?' sat':''}`;
+    const evs=data.filter(e=>e.date===ds2&&(curSt==='all'||e.store===curSt)).sort((a,b)=>a.time.localeCompare(b.time));
+    h+=`<div class="${cls}" data-date="${ds2}" ondblclick="openAdd('${ds2}')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="dropEv(event,'${ds2}')">`;
+    h+=`<div class="dn">${d}</div>`;
+    evs.slice(0,3).forEach(e=>{
+      const dn=e.status==='done'?' ev-done':'';
+      h+=`<div class="ev ${e.platform}${dn}" draggable="true" ondragstart="dragEv(event,${e.id})" onclick="event.stopPropagation();showDet(${e.id})" title="${STORES[e.store]?.name}: ${e.title}">${STORES[e.store]?.short} ${e.title}</div>`;
+    });
+    if(evs.length>3)h+=`<div class="ev-more">+${evs.length-3}</div>`;
+    h+=`<span class="add-h">+</span></div>`;
+  }
+  const tot=f1+dim;const rem=(7-tot%7)%7;
+  for(let i=1;i<=rem;i++)h+=`<div class="cc oth"><div class="dn">${i}</div></div>`;
+  g.innerHTML=h;
+  const mn=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  document.getElementById('mTitle').textContent=`${curY}년 ${mn[curM]}`;
+  const me=data.filter(e=>{const d=new Date(e.date);return d.getMonth()===curM&&d.getFullYear()===curY&&(curSt==='all'||e.store===curSt)});
+  const pend=me.filter(e=>e.status==='scheduled'||e.status==='progress').length;
+  const done=me.filter(e=>e.status==='done').length;
+  const od=me.filter(e=>e.date<t&&(e.status==='scheduled'||e.status==='progress')).length;
+  document.getElementById('calStats').innerHTML=`<div class="cst">총 <b>${me.length}</b></div><div class="cst">대기 <b class="w">${pend}</b></div><div class="cst">완료 <b>${done}</b></div>${od?`<div class="cst">지연 <b class="d">${od}</b></div>`:''}`;
+}
+function chMo(d){curM+=d;if(curM>11){curM=0;curY++}if(curM<0){curM=11;curY--}renderCal()}
+function goToday(){const t=new Date();curY=t.getFullYear();curM=t.getMonth();renderCal()}
+let dragId=null;
+function dragEv(e,id){dragId=id;e.dataTransfer.effectAllowed='move';e.target.classList.add('dragging')}
+function dropEv(e,date){e.preventDefault();e.currentTarget.classList.remove('drag-over');if(dragId===null)return;const ev=data.find(x=>x.id===dragId);if(ev){ev.date=date;save();renderCal()}dragId=null}
+
+// ============ EVENTS CRUD ============
+function showDet(id){
+  detId=id;const e=data.find(x=>x.id===id);if(!e)return;
+  document.getElementById('detTi').textContent=e.title;
+  let perf='';
+  if(e.views||e.likes||e.comments)perf=`<div class="f"><label>성과</label><div class="fv">조회 <b>${fmt(e.views)}</b> · 좋아요 <b>${fmt(e.likes)}</b> · 댓글 <b>${fmt(e.comments)}</b></div></div>`;
+  let uploadInfo='';
+  if(e.uploadUrl&&e.uploadUrl.trim())uploadInfo=`<div class="f"><label>업로드 링크</label><div class="fv"><a href="${e.uploadUrl}" target="_blank" style="color:var(--ac);text-decoration:none;word-break:break-all">🔗 ${e.uploadUrl}</a></div></div>`;
+  document.getElementById('detBd').innerHTML=`
+    <div class="f"><label>매장</label><div class="fv">${STORES[e.store]?.name}</div></div>
+    <div class="f"><label>플랫폼</label><div class="fv"><span class="ptag ${e.platform}">${PLATS[e.platform]?.f}</span></div></div>
+    <div class="f"><label>일시</label><div class="fv">${e.date} ${e.time}</div></div>
+    ${e.influencer?`<div class="f"><label>인플루언서</label><div class="fv">${e.influencer}</div></div>`:''}
+    <div class="f"><label>상태</label><div class="fv"><span class="stag ${e.status}">${STAT[e.status]}</span></div></div>
+    ${e.cost?`<div class="f"><label>비용</label><div class="fv">${fmt(e.cost)}원</div></div>`:''}
+    ${perf}${uploadInfo}
+    ${e.memo?`<div class="f"><label>메모</label><div class="fv">${e.memo}</div></div>`:''}`;
+  document.getElementById('detOv').classList.add('show');
+}
+function closeDet(){document.getElementById('detOv').classList.remove('show');detId=null}
+function delEv(){if(!detId)return;if(!confirm('삭제?'))return;data=data.filter(e=>e.id!==detId);save();closeDet();renderCal();renderST()}
+function editDet(){if(!detId)return;closeDet();openAdd(null,detId)}
+
+function openAdd(ds,eid){
+  editId=eid||null;
+  const sel=document.getElementById('fSt');
+  sel.innerHTML=Object.entries(STORES).map(([k,v])=>`<option value="${k}">${v.name}</option>`).join('');
+  // Populate influencer dropdown
+  const infSel=document.getElementById('fInf');
+  infSel.innerHTML=`<option value="">-- 선택 --</option>`+influencers.map(inf=>`<option value="${inf.handle}">${inf.name} (${inf.handle}) - ${fmt(inf.rate)}원</option>`).join('')+`<option value="__custom__">직접 입력</option>`;
+  infSel.onchange=function(){document.getElementById('fInfCustomWrap').style.display=this.value==='__custom__'?'block':'none'};
+  document.getElementById('fInfCustomWrap').style.display='none';
+
+  if(editId){
+    const e=data.find(x=>x.id===editId);if(!e)return;
+    document.getElementById('addTi').textContent='스케줄 수정';
+    sel.value=e.store;document.getElementById('fPl').value=e.platform;document.getElementById('fTi').value=e.title;
+    document.getElementById('fDt').value=e.date;document.getElementById('fTm').value=e.time;
+    // Set influencer
+    const hasInf=influencers.find(x=>x.handle===e.influencer);
+    if(hasInf){infSel.value=e.influencer}else if(e.influencer){infSel.value='__custom__';document.getElementById('fInfCustomWrap').style.display='block';document.getElementById('fInfCustom').value=e.influencer}
+    document.getElementById('fSts').value=e.status;document.getElementById('fViews').value=e.views||'';
+    document.getElementById('fLikes').value=e.likes||'';document.getElementById('fComments').value=e.comments||'';
+    document.getElementById('fCost').value=e.cost||'';document.getElementById('fMemo').value=e.memo||'';
+  }else{
+    document.getElementById('addTi').textContent='스케줄 등록';
+    document.getElementById('fTi').value='';document.getElementById('fDt').value=ds||'';
+    document.getElementById('fTm').value='18:00';infSel.value='';
+    document.getElementById('fSts').value='scheduled';document.getElementById('fViews').value='';
+    document.getElementById('fLikes').value='';document.getElementById('fComments').value='';
+    document.getElementById('fCost').value='';document.getElementById('fMemo').value='';
+  }
+  document.getElementById('addOv').classList.add('show');
+}
+function closeAdd(){document.getElementById('addOv').classList.remove('show');editId=null}
+function saveEv(){
+  const infVal=document.getElementById('fInf').value;
+  const infHandle=infVal==='__custom__'?document.getElementById('fInfCustom').value:infVal;
+  // Auto-fill cost from influencer rate if empty
+  let cost=parseInt(document.getElementById('fCost').value)||0;
+  if(!cost&&infHandle){const inf=influencers.find(x=>x.handle===infHandle);if(inf)cost=inf.rate}
+  const ev={
+    store:document.getElementById('fSt').value,platform:document.getElementById('fPl').value,
+    title:document.getElementById('fTi').value||'새 콘텐츠',date:document.getElementById('fDt').value,
+    time:document.getElementById('fTm').value,influencer:infHandle,status:document.getElementById('fSts').value,
+    views:parseInt(document.getElementById('fViews').value)||0,
+    likes:parseInt(document.getElementById('fLikes').value)||0,
+    comments:parseInt(document.getElementById('fComments').value)||0,
+    cost:cost,memo:document.getElementById('fMemo').value
+  };
+  if(!ev.date){alert('날짜 선택!');return}
+  if(editId){const i=data.findIndex(x=>x.id===editId);if(i>=0)data[i]={...data[i],...ev}}
+  else{ev.id=idc++;ev.uploadUrl='';data.push(ev)}
+  save();closeAdd();renderCal();renderST();
+}
+
+// Recurring
+function openRecurring(){
+  document.getElementById('rSt').innerHTML=Object.entries(STORES).map(([k,v])=>`<option value="${k}">${v.name}</option>`).join('');
+  document.getElementById('recOv').classList.add('show');
+}
+function closeRec(){document.getElementById('recOv').classList.remove('show')}
+function saveRec(){
+  const st=document.getElementById('rSt').value,pl=document.getElementById('rPl').value;
+  const ti=document.getElementById('rTi').value||'반복 콘텐츠';
+  const tm=document.getElementById('rTm').value,inf=document.getElementById('rInf').value;
+  const from=new Date(document.getElementById('rFrom').value),to=new Date(document.getElementById('rTo').value);
+  const days=[...document.querySelectorAll('.r-day:checked')].map(x=>parseInt(x.value));
+  if(!days.length){alert('요일 선택!');return}
+  if(isNaN(from)||isNaN(to)){alert('기간 선택!');return}
+  let cnt=0;
+  for(let d=new Date(from);d<=to;d.setDate(d.getDate()+1)){
+    if(days.includes(d.getDay())){
+      data.push({id:idc++,store:st,platform:pl,title:ti,date:`${d.getFullYear()}-${S(d.getMonth()+1)}-${S(d.getDate())}`,time:tm,influencer:inf,status:'scheduled',memo:'반복등록',views:0,likes:0,comments:0,cost:0,uploadUrl:''});
+      cnt++;
+    }
+  }
+  save();closeRec();renderCal();renderST();alert(`${cnt}건 등록 완료!`);
+}
+
+// ============ INFLUENCER DB ============
+function renderInfs(){
+  const g=document.getElementById('infGrid');
+  if(!influencers.length){g.innerHTML='<div class="empty"><div class="eico">👤</div><p>등록된 인플루언서가 없습니다.</p></div>';return}
+  g.innerHTML=influencers.map(inf=>{
+    const used=data.filter(e=>e.influencer===inf.handle).length;
+    return `<div class="inf-card">
+      <div class="inf-top">
+        <div class="inf-avi">👤</div>
+        <div><div class="inf-name">${inf.name}</div><div class="inf-handle">${inf.handle}</div><div class="inf-cat">${inf.category}</div></div>
+      </div>
+      <div class="inf-stats">
+        <div class="inf-st"><div class="inf-st-n">${fmt(inf.followers)}</div><div class="inf-st-l">팔로워</div></div>
+        <div class="inf-st"><div class="inf-st-n">${fmt(inf.avgViews)}</div><div class="inf-st-l">평균조회</div></div>
+        <div class="inf-st"><div class="inf-st-n">${fmt(inf.rate)}원</div><div class="inf-st-l">단가</div></div>
+      </div>
+      <div class="inf-plats">${(inf.platforms||[]).map(p=>`<span class="inf-pt ${p}">${PLATS[p]?.n||p}</span>`).join('')}</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:8px">협업 ${used}회${inf.memo?' · '+inf.memo:''}</div>
+      <div class="inf-actions">
+        <button class="inf-btn" onclick="editInf(${inf.id})">✏️ 수정</button>
+        <button class="inf-btn" onclick="if(confirm('삭제?')){influencers=influencers.filter(x=>x.id!==${inf.id});saveInfs();renderInfs()}">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function openInfAdd(){
+  infEditId=null;document.getElementById('infAddTi').textContent='인플루언서 추가';
+  ['iName','iHandle','iPlats','iMemo'].forEach(x=>document.getElementById(x).value='');
+  ['iFollowers','iAvgViews','iRate'].forEach(x=>document.getElementById(x).value='');
+  document.getElementById('infOv').classList.add('show');
+}
+function closeInfAdd(){document.getElementById('infOv').classList.remove('show')}
+function editInf(id){
+  const inf=influencers.find(x=>x.id===id);if(!inf)return;
+  infEditId=id;document.getElementById('infAddTi').textContent='인플루언서 수정';
+  document.getElementById('iName').value=inf.name;document.getElementById('iHandle').value=inf.handle;
+  document.getElementById('iCat').value=inf.category;
+  document.getElementById('iPlats').value=(inf.platforms||[]).join(', ');
+  document.getElementById('iFollowers').value=inf.followers;document.getElementById('iAvgViews').value=inf.avgViews;
+  document.getElementById('iRate').value=inf.rate;document.getElementById('iMemo').value=inf.memo||'';
+  document.getElementById('infOv').classList.add('show');
+}
+function saveInf(){
+  const obj={
+    name:document.getElementById('iName').value||'이름없음',handle:document.getElementById('iHandle').value||'@unknown',
+    category:document.getElementById('iCat').value,
+    platforms:document.getElementById('iPlats').value.split(',').map(x=>x.trim()).filter(Boolean),
+    followers:parseInt(document.getElementById('iFollowers').value)||0,
+    avgViews:parseInt(document.getElementById('iAvgViews').value)||0,
+    rate:parseInt(document.getElementById('iRate').value)||0,
+    memo:document.getElementById('iMemo').value
+  };
+  if(infEditId){const i=influencers.findIndex(x=>x.id===infEditId);if(i>=0)influencers[i]={...influencers[i],...obj}}
+  else{obj.id=infc++;influencers.push(obj)}
+  saveInfs();closeInfAdd();renderInfs();
+}
+function exportInfCSV(){
+  const rows=[['이름','핸들','카테고리','플랫폼','팔로워','평균조회','단가','메모']];
+  influencers.forEach(i=>rows.push([i.name,i.handle,i.category,(i.platforms||[]).join('/'),i.followers,i.avgViews,i.rate,i.memo||'']));
+  dlCSV(rows,'인플루언서DB');
+}
+
+// ============ REPORT ============
+function renderRpt(){
+  const mn=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  document.getElementById('rptMonth').textContent=`${rptY}년 ${mn[rptM]}`;
+  const me=data.filter(e=>{const d=new Date(e.date);return d.getMonth()===rptM&&d.getFullYear()===rptY});
+  const total=me.length,done=me.filter(e=>e.status==='done').length;
+  const totalViews=me.reduce((a,e)=>a+(e.views||0),0),totalLikes=me.reduce((a,e)=>a+(e.likes||0),0),totalCost=me.reduce((a,e)=>a+(e.cost||0),0);
+  const bySt={};me.forEach(e=>{if(!bySt[e.store])bySt[e.store]={total:0,done:0,views:0,likes:0,cost:0};bySt[e.store].total++;if(e.status==='done')bySt[e.store].done++;bySt[e.store].views+=(e.views||0);bySt[e.store].likes+=(e.likes||0);bySt[e.store].cost+=(e.cost||0)});
+  const byPl={};me.forEach(e=>{if(!byPl[e.platform])byPl[e.platform]={total:0,views:0,likes:0};byPl[e.platform].total++;byPl[e.platform].views+=(e.views||0);byPl[e.platform].likes+=(e.likes||0)});
+  let h=`<div class="rpt-cards">
+    <div class="rpt-card"><div class="rpt-card-label">총 콘텐츠</div><div class="rpt-card-num">${total}</div><div class="rpt-card-sub">완료 ${done} / 대기 ${total-done}</div></div>
+    <div class="rpt-card"><div class="rpt-card-label">총 조회수</div><div class="rpt-card-num">${fmt(totalViews)}</div><div class="rpt-card-sub">평균 ${total?fmt(Math.round(totalViews/total)):0}/건</div></div>
+    <div class="rpt-card"><div class="rpt-card-label">총 인터랙션</div><div class="rpt-card-num">${fmt(totalLikes)}</div><div class="rpt-card-sub">좋아요 기준</div></div>
+    <div class="rpt-card"><div class="rpt-card-label">총 비용</div><div class="rpt-card-num">${fmt(totalCost)}원</div><div class="rpt-card-sub">CPV ${totalViews?Math.round(totalCost/totalViews):0}원</div></div>
+  </div>`;
+  h+=`<div class="rpt-section"><h3>매장별 성과</h3><table class="rpt-table"><thead><tr><th>매장</th><th>콘텐츠</th><th>완료</th><th>조회수</th><th>좋아요</th><th>비용</th></tr></thead><tbody>`;
+  Object.entries(bySt).forEach(([k,v])=>{h+=`<tr><td>${STORES[k]?.name||k}</td><td>${v.total}</td><td>${v.done}</td><td>${fmt(v.views)}</td><td>${fmt(v.likes)}</td><td>${fmt(v.cost)}원</td></tr>`});
+  h+=`</tbody></table></div>`;
+  h+=`<div class="rpt-section"><h3>플랫폼별 성과</h3><table class="rpt-table"><thead><tr><th>플랫폼</th><th>콘텐츠 수</th><th>조회수</th><th>좋아요</th></tr></thead><tbody>`;
+  Object.entries(byPl).forEach(([k,v])=>{h+=`<tr><td><span class="ptag ${k}">${PLATS[k]?.f||k}</span></td><td>${v.total}</td><td>${fmt(v.views)}</td><td>${fmt(v.likes)}</td></tr>`});
+  h+=`</tbody></table></div>`;
+  const topEvs=me.filter(e=>e.views>0).sort((a,b)=>(b.views||0)-(a.views||0)).slice(0,5);
+  if(topEvs.length){
+    h+=`<div class="rpt-section"><h3>Top 콘텐츠</h3><table class="rpt-table"><thead><tr><th>콘텐츠</th><th>매장</th><th>플랫폼</th><th>조회수</th><th>좋아요</th></tr></thead><tbody>`;
+    topEvs.forEach(e=>{h+=`<tr><td>${e.title}</td><td>${STORES[e.store]?.short}</td><td><span class="ptag ${e.platform}">${PLATS[e.platform]?.n}</span></td><td>${fmt(e.views)}</td><td>${fmt(e.likes)}</td></tr>`});
+    h+=`</tbody></table></div>`;
+  }
+  document.getElementById('rptBody').innerHTML=h;
+}
+function chRptMo(d){rptM+=d;if(rptM>11){rptM=0;rptY++}if(rptM<0){rptM=11;rptY--}renderRpt()}
+function exportReport(){
+  const mn=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const me=data.filter(e=>{const d=new Date(e.date);return d.getMonth()===rptM&&d.getFullYear()===rptY});
+  const rows=[['매장','플랫폼','제목','날짜','시간','인플루언서','상태','조회수','좋아요','댓글','비용','메모']];
+  me.sort((a,b)=>a.date.localeCompare(b.date)).forEach(e=>{rows.push([STORES[e.store]?.name,PLATS[e.platform]?.f,e.title,e.date,e.time,e.influencer||'',STAT[e.status],e.views||0,e.likes||0,e.comments||0,e.cost||0,e.memo||''])});
+  dlCSV(rows,`리포트_${rptY}${mn[rptM]}`);
+}
+
+// ============ BUDGET ============
+function renderBgt(){
+  const mn=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  document.getElementById('bgtMonth').textContent=`${bgtY}년 ${mn[bgtM]}`;
+  document.getElementById('bgtGrid').innerHTML=Object.entries(STORES).map(([k,v])=>{
+    const budget=budgets[k]?.monthly||0;
+    const spent=data.filter(e=>{const d=new Date(e.date);return e.store===k&&d.getMonth()===bgtM&&d.getFullYear()===bgtY}).reduce((a,e)=>a+(e.cost||0),0);
+    const pct=budget?Math.min(Math.round(spent/budget*100),100):0;
+    const color=pct>90?'var(--dg)':pct>70?'var(--wn)':'var(--ac)';
+    const items=data.filter(e=>{const d=new Date(e.date);return e.store===k&&d.getMonth()===bgtM&&d.getFullYear()===bgtY&&e.cost>0}).sort((a,b)=>a.date.localeCompare(b.date));
+    return `<div class="bgt-card">
+      <div class="bgt-card-top"><div class="bgt-card-name"><span class="st-dot" style="background:${v.color};display:inline-block"></span>${v.name}</div><div class="bgt-total">${fmt(budget)}원</div></div>
+      <div class="bgt-bar"><div class="bgt-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="bgt-detail"><span>사용 ${fmt(spent)}원 (${pct}%)</span><span>잔여 ${fmt(Math.max(budget-spent,0))}원</span></div>
+      ${items.length?`<div class="bgt-items">${items.map(e=>`<div class="bgt-item"><span>${e.date} ${PLATS[e.platform]?.n} - ${e.title}</span><span style="font-weight:600">${fmt(e.cost)}원</span></div>`).join('')}</div>`:''}
+    </div>`;
+  }).join('');
+}
+function chBgtMo(d){bgtM+=d;if(bgtM>11){bgtM=0;bgtY++}if(bgtM<0){bgtM=11;bgtY--}renderBgt()}
+function openBgtEdit(){
+  document.getElementById('bgtEditBody').innerHTML=Object.entries(STORES).map(([k,v])=>`<div class="f"><label>${v.name}</label><input class="fi" id="bgt_${k}" type="number" value="${budgets[k]?.monthly||0}" placeholder="월 예산 (원)"></div>`).join('');
+  document.getElementById('bgtOv').classList.add('show');
+}
+function closeBgtEdit(){document.getElementById('bgtOv').classList.remove('show')}
+function saveBgt(){
+  Object.keys(STORES).forEach(k=>{if(!budgets[k])budgets[k]={};budgets[k].monthly=parseInt(document.getElementById('bgt_'+k).value)||0});
+  saveBgts();closeBgtEdit();renderBgt();
+}
+
+// ============ KAKAO ============
+function renderKakao(){
+  const t=td(),ts=tmrwStr();
+  const bd=document.getElementById('kakaoBody');let h='';
+  const d1=data.filter(e=>e.date===ts&&e.status==='scheduled');
+  if(d1.length){
+    h+=`<div class="kakao-section"><h3>📢 내일 업로드 알림 (D-1)</h3>`;
+    Object.entries(STORES).forEach(([k,v])=>{
+      const evs=d1.filter(e=>e.store===k);if(!evs.length)return;
+      const msg=`[AWESOMEPLAN 알림]\n\n📅 내일 업로드 예정 콘텐츠\n━━━━━━━━━━━━\n\n🏪 ${v.name}\n\n${evs.map(e=>`⏰ ${e.time} | ${PLATS[e.platform]?.n}\n📝 ${e.title}${e.influencer?`\n👤 ${e.influencer}`:''}`).join('\n\n')}\n\n━━━━━━━━━━━━\n✅ 최종 확인 부탁드립니다!`;
+      h+=`<div class="kakao-msg">${msg}</div><button class="kakao-copy" onclick="copyKakao(this,'${encodeURIComponent(msg)}')">📋 ${v.short} 알림 복사</button> `;
+    });
+    h+=`</div>`;
+  }
+  const today=data.filter(e=>e.date===t&&(e.status==='scheduled'||e.status==='progress'));
+  if(today.length){
+    h+=`<div class="kakao-section"><h3>🔥 오늘 업로드</h3>`;
+    const msg=`[AWESOMEPLAN 알림]\n\n🔥 오늘 업로드 예정\n━━━━━━━━━━━━\n\n${today.map(e=>`⏰ ${e.time} | ${STORES[e.store]?.short}\n📝 ${PLATS[e.platform]?.n} - ${e.title}`).join('\n\n')}\n\n━━━━━━━━━━━━`;
+    h+=`<div class="kakao-msg">${msg}</div><button class="kakao-copy" onclick="copyKakao(this,'${encodeURIComponent(msg)}')">📋 오늘 알림 복사</button></div>`;
+  }
+  // Influencer-specific reminders
+  if(influencers.length){
+    const upcoming=data.filter(e=>e.date>=t&&e.date<=tmrwStr()&&e.status==='scheduled'&&e.influencer);
+    if(upcoming.length){
+      h+=`<div class="kakao-section"><h3>📲 릴서별 리마인드 메시지</h3>`;
+      const byInf={};upcoming.forEach(e=>{if(!byInf[e.influencer])byInf[e.influencer]=[];byInf[e.influencer].push(e)});
+      Object.entries(byInf).forEach(([handle,evs])=>{
+        const inf=influencers.find(x=>x.handle===handle);
+        const name=inf?inf.name:handle;
+        const msg=`[AWESOMEPLAN]\n\n안녕하세요 ${name}님! 📸\n촬영/업로드 일정 리마인드 드립니다.\n\n${evs.map(e=>`📌 ${e.date} ${e.time}\n🏪 ${STORES[e.store]?.name}\n📝 ${e.title}\n${PLATS[e.platform]?.f}`).join('\n\n')}\n\n━━━━━━━━━━━━\n완료 후 아래 링크에서 상태 변경 부탁드려요!\n${location.origin+location.pathname}?inf=${encodeURIComponent(handle)}`;
+        h+=`<div class="kakao-msg">${msg}</div><button class="kakao-copy" onclick="copyKakao(this,'${encodeURIComponent(msg)}')">📋 ${name} 리마인드 복사</button> `;
+      });
+      h+=`</div>`;
+    }
+  }
+  if(!h)h='<div class="empty"><div class="eico">💬</div><p>생성할 알림 메시지가 없습니다.</p></div>';
+  bd.innerHTML=h;
+}
+function genAllKakao(){renderKakao()}
+function copyKakao(btn,encoded){
+  navigator.clipboard.writeText(decodeURIComponent(encoded)).then(()=>{
+    btn.textContent='✓ 복사됨!';btn.style.background='var(--ok)';
+    setTimeout(()=>{btn.textContent=btn.textContent.replace('✓ 복사됨!','📋 복사');btn.style.background=''},1500);
+  });
+}
+
+// ============ CSV ============
+function exportCSV(){
+  const filtered=curSt==='all'?data:data.filter(e=>e.store===curSt);
+  const sn=curSt==='all'?'전체':STORES[curSt]?.name;
+  const rows=[['매장','플랫폼','제목','날짜','시간','인플루언서','상태','조회수','좋아요','댓글','비용','메모','업로드링크']];
+  filtered.sort((a,b)=>a.date.localeCompare(b.date)).forEach(e=>{
+    rows.push([STORES[e.store]?.name,PLATS[e.platform]?.f,e.title,e.date,e.time,e.influencer||'',STAT[e.status],e.views||0,e.likes||0,e.comments||0,e.cost||0,e.memo||'',e.uploadUrl||'']);
+  });
+  dlCSV(rows,`${sn}_스케줄`);
+}
+function dlCSV(rows,name){
+  const csv=rows.map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${name}_${td()}.csv`;a.click();
+}
+
+// ============ SHARE ============
+function openSharePanel(){renderShareLinks();document.getElementById('shareOv').classList.add('show')}
+function closeShare(){document.getElementById('shareOv').classList.remove('show')}
+function renderShareLinks(){
+  const base=location.origin+location.pathname;
+  let h=`<div style="font-size:10px;color:var(--t3);padding:0 0 6px;font-weight:600">👑 관리자</div>`;
+  h+=`<div class="share-item"><div><div class="share-name">📅 전체 관리자 화면</div><div class="share-url">${base}</div></div><div class="share-btns"><button class="scb" onclick="cpLink('${base}',this)">복사</button></div></div>`;
+
+  h+=`<div style="font-size:10px;color:var(--t3);padding:14px 0 6px;font-weight:600">🏪 매장별 링크 (매장 담당자용)</div>`;
+  h+=`<div style="font-size:9px;color:var(--t2);background:var(--bg3);padding:6px 10px;border-radius:6px;margin-bottom:6px;line-height:1.5">매장 담당자에게 전달하면 해당 매장의 릴서 방문 스케줄, 완료 현황, 업로드 링크를 확인할 수 있습니다.</div>`;
+  Object.entries(STORES).forEach(([k,v])=>{
+    const cnt=data.filter(e=>e.store===k&&e.date>=td()&&e.status!=='done'&&e.status!=='cancelled').length;
+    const url=`${base}?store=${k}`;
+    h+=`<div class="share-item"><div style="display:flex;align-items:center;gap:8px"><span class="st-dot" style="background:${v.color};display:inline-block"></span><div><div class="share-name">${v.name}</div><div class="share-url">${url}</div><div class="share-meta">예정 ${cnt}건</div></div></div><div class="share-btns"><button class="scb" onclick="cpLink('${url}',this)">복사</button></div></div>`;
+  });
+
+  if(influencers.length){
+    h+=`<div style="font-size:10px;color:var(--t3);padding:14px 0 6px;font-weight:600">📸 릴서별 링크 (인플루언서 전용)</div>`;
+    h+=`<div style="font-size:9px;color:var(--t2);background:var(--bg3);padding:6px 10px;border-radius:6px;margin-bottom:6px;line-height:1.5">릴서에게 링크를 보내면 본인 스케줄 확인, 상태 변경, 업로드 링크 등록이 가능합니다.</div>`;
+    influencers.forEach(inf=>{
+      const cnt=data.filter(e=>e.influencer===inf.handle&&e.date>=td()&&e.status!=='done'&&e.status!=='cancelled').length;
+      const url=`${base}?inf=${encodeURIComponent(inf.handle)}`;
+      h+=`<div class="share-item"><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:50%;background:var(--acg);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">👤</div><div><div class="share-name">${inf.name} <span style="color:var(--ac);font-weight:400">${inf.handle}</span></div><div class="share-url">${url}</div><div class="share-meta">예정 ${cnt}건</div></div></div><div class="share-btns"><button class="scb" onclick="cpLink('${url}',this)">복사</button></div></div>`;
+    });
+  }
+  document.getElementById('shareLinkList').innerHTML=h;
+}
+function cpLink(url,btn){
+  navigator.clipboard.writeText(url).then(()=>{
+    btn.textContent='✓';btn.style.background='var(--ok)';btn.style.color='#fff';btn.style.borderColor='var(--ok)';
+    setTimeout(()=>{btn.textContent='복사';btn.style.background='';btn.style.color='';btn.style.borderColor=''},1200);
+  });
+}
+
+// ============ CHAT ============
+function addMsg(t,type){
+  const c=document.getElementById('chatMs');const d=document.createElement('div');
+  d.className=`msg ${type}`;d.innerHTML=`<div class="mb">${t}</div><div class="mt">${now()}</div>`;
+  c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+function sendChat(){
+  const inp=document.getElementById('chatIn'),t=inp.value.trim();if(!t)return;
+  addMsg(t,'user');inp.value='';inp.style.height='auto';
+  const c=document.getElementById('chatMs'),d=document.createElement('div');
+  d.className='msg bot';d.id='tyM';d.innerHTML='<div class="mb"><div class="tdots"><span></span><span></span><span></span></div></div>';
+  c.appendChild(d);c.scrollTop=c.scrollHeight;
+  setTimeout(()=>{d.remove();addMsg(genResp(t),'bot')},500+Math.random()*400);
+}
+function ask(q){document.getElementById('chatIn').value=q;sendChat()}
+function genResp(q){
+  const ql=q.toLowerCase(),t=td(),today=new Date();
+  if(ql.includes('오늘')){const evs=data.filter(e=>e.date===t).sort((a,b)=>a.time.localeCompare(b.time));if(!evs.length)return'오늘 스케줄 없음';return`📅 <b>오늘 (${evs.length}건)</b><br><br>`+evs.map(e=>`${e.status==='done'?'✅':'⏰'} <b>${e.time}</b> ${STORES[e.store]?.short} | ${PLATS[e.platform]?.n} - ${e.title}`).join('<br>')}
+  if(ql.includes('내일')){const t2=new Date(today);t2.setDate(today.getDate()+1);const ts=`${t2.getFullYear()}-${S(t2.getMonth()+1)}-${S(t2.getDate())}`;const evs=data.filter(e=>e.date===ts).sort((a,b)=>a.time.localeCompare(b.time));if(!evs.length)return'내일 스케줄 없음';return`📅 <b>내일 (${evs.length}건)</b><br><br>`+evs.map(e=>`⏰ <b>${e.time}</b> ${STORES[e.store]?.short} | ${PLATS[e.platform]?.n} - ${e.title}`).join('<br>')}
+  if(ql.includes('이번 주')||ql.includes('이번주')){const ws=new Date(today);ws.setDate(today.getDate()-today.getDay());const we=new Date(ws);we.setDate(ws.getDate()+6);const evs=data.filter(e=>{const d=new Date(e.date);return d>=ws&&d<=we}).sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time));if(!evs.length)return'이번 주 스케줄 없음';let m=`📋 <b>이번 주 (${evs.length}건)</b><br><br>`,ld='';evs.forEach(e=>{const d=new Date(e.date);if(e.date!==ld){m+=`<b>${d.getMonth()+1}/${d.getDate()}(${DN[d.getDay()]})</b><br>`;ld=e.date}m+=`  ${e.time} | ${STORES[e.store]?.short} | ${PLATS[e.platform]?.n} - ${e.title}<br>`});return m}
+  if(ql.includes('요약')||ql.includes('월간')||ql.includes('이번달')){const me=data.filter(e=>{const d=new Date(e.date);return d.getMonth()===today.getMonth()&&d.getFullYear()===today.getFullYear()});const tv=me.reduce((a,e)=>a+(e.views||0),0),tl=me.reduce((a,e)=>a+(e.likes||0),0),tc=me.reduce((a,e)=>a+(e.cost||0),0);return`📊 <b>이번 달 (${me.length}건)</b><br><br>✅완료 ${me.filter(e=>e.status==='done').length} | ⏰대기 ${me.filter(e=>e.status==='scheduled').length} | 🔄진행 ${me.filter(e=>e.status==='progress').length}<br>👀조회 ${fmt(tv)} · ❤️좋아요 ${fmt(tl)}<br>💰비용 ${fmt(tc)}원`}
+  if(ql.includes('지연')){const od=data.filter(e=>e.date<t&&(e.status==='scheduled'||e.status==='progress'));if(!od.length)return'✅ 지연 없음!';return`⚠️ <b>지연 ${od.length}건</b><br><br>`+od.map(e=>`🔴 ${e.date} | ${STORES[e.store]?.short} - ${e.title}`).join('<br>')}
+  for(const[k,v]of Object.entries(STORES)){if([v.name.toLowerCase(),v.short.toLowerCase(),k].some(x=>ql.includes(x))){const evs=data.filter(e=>e.store===k&&e.date>=t).sort((a,b)=>a.date.localeCompare(b.date));if(!evs.length)return`${v.name} 예정 없음`;return`📋 <b>${v.name} (${evs.length}건)</b><br><br>`+evs.slice(0,5).map(e=>`📌 ${e.date} ${e.time} | ${PLATS[e.platform]?.n} - ${e.title}`).join('<br>')+(evs.length>5?`<br>...외 ${evs.length-5}건`:'')}}
+  if(ql.includes('릴스')||ql.includes('인스타'))return pSearch('instagram','📸 릴스');
+  if(ql.includes('틱톡'))return pSearch('tiktok','🎵 틱톡');
+  if(ql.includes('유튜브')||ql.includes('숏츠'))return pSearch('youtube','▶️ 숏츠');
+  if(ql.includes('블로그')||ql.includes('네이버'))return pSearch('naver','📝 블로그');
+  return`질문을 이해 못했어요 😅<br>• "오늘/내일/이번주 스케줄"<br>• "엉클조 일정"<br>• "릴스 스케줄" / "지연 현황"<br>• "월간 요약"`;
+}
+function pSearch(p,label){const t=td();const evs=data.filter(e=>e.platform===p&&e.date>=t).sort((a,b)=>a.date.localeCompare(b.date));if(!evs.length)return`${label} 예정 없음`;return`${label} <b>(${evs.length}건)</b><br><br>`+evs.slice(0,5).map(e=>`${e.date} ${e.time} | ${STORES[e.store]?.short} - ${e.title}`).join('<br>')}
+
+// ============ STORE VIEW (매장 전용) ============
+function checkStoreMode(){
+  const p=new URLSearchParams(location.search).get('store');
+  if(!p||!STORES[p])return false;
+  svStoreKey=p;isStoreView=true;
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('storeView').classList.add('active');
+  renderStoreView();
+  return true;
+}
+
+function renderStoreView(){
+  const s=STORES[svStoreKey];if(!s)return;
+  const t=td();
+  const myEvs=data.filter(e=>e.store===svStoreKey);
+  const upcoming=myEvs.filter(e=>e.date>=t&&e.status!=='done'&&e.status!=='cancelled');
+  const done=myEvs.filter(e=>e.status==='done');
+  const overdue=myEvs.filter(e=>e.date<t&&(e.status==='scheduled'||e.status==='progress'));
+  const totalCost=myEvs.reduce((a,e)=>a+(e.cost||0),0);
+
+  document.getElementById('svDot').style.background=s.color;
+  document.getElementById('svName').textContent=s.name;
+  document.getElementById('svSub').textContent=`광고 스케줄 현황 · 매장 전용 뷰`;
+
+  document.getElementById('svStats').innerHTML=`
+    <div class="sv-stat"><div class="sv-stat-n">${myEvs.length}</div><div class="sv-stat-l">전체</div></div>
+    <div class="sv-stat"><div class="sv-stat-n" style="color:var(--wn)">${upcoming.length}</div><div class="sv-stat-l">예정</div></div>
+    <div class="sv-stat"><div class="sv-stat-n" style="color:var(--ok)">${done.length}</div><div class="sv-stat-l">완료</div></div>
+    <div class="sv-stat"><div class="sv-stat-n" style="color:${overdue.length?'var(--dg)':'var(--t1)'}">${overdue.length}</div><div class="sv-stat-l">지연</div></div>`;
+
+  renderSvList();
+}
+
+function svFilter(mode,el){
+  svFilterMode=mode;
+  document.querySelectorAll('.sv-tab').forEach(t=>t.classList.remove('on'));
+  if(el)el.classList.add('on');
+  renderSvList();
+}
+
+function renderSvList(){
+  const t=td(),tmrw=tmrwStr();
+  let evs=data.filter(e=>e.store===svStoreKey);
+
+  if(svFilterMode==='today') evs=evs.filter(e=>e.date===t);
+  else if(svFilterMode==='upcoming') evs=evs.filter(e=>e.date>=t&&e.status!=='done'&&e.status!=='cancelled');
+  else if(svFilterMode==='done') evs=evs.filter(e=>e.status==='done');
+
+  evs.sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time));
+
+  if(!evs.length){
+    const msgs={today:'오늘 방문 예정인 릴서가 없습니다.',upcoming:'예정된 촬영이 없습니다.',done:'완료된 콘텐츠가 없습니다.',all:'등록된 스케줄이 없습니다.'};
+    document.getElementById('svBody').innerHTML=`<div class="iv-empty"><div class="eico">📭</div><p>${msgs[svFilterMode]||msgs.all}</p></div>`;
+    return;
+  }
+
+  let h='';
+
+  // Today banner for today/upcoming tab
+  if(svFilterMode==='today'||svFilterMode==='upcoming'){
+    const todayEvs=evs.filter(e=>e.date===t);
+    if(todayEvs.length){
+      h+=`<div class="sv-today-banner"><h3>📸 오늘 방문 릴서 <span class="cnt" style="background:var(--ac);color:#fff;padding:2px 8px;border-radius:10px;font-size:11px">${todayEvs.length}명</span></h3>`;
+      todayEvs.forEach(e=>{
+        const inf=influencers.find(x=>x.handle===e.influencer);
+        h+=`<div class="sv-visit-card">
+          <div class="sv-visit-top">
+            <div class="sv-visit-inf"><div class="sv-visit-avi">📸</div><div><div class="sv-visit-name">${inf?inf.name:e.influencer||'미배정'}</div>${e.influencer?`<div class="sv-visit-handle">${e.influencer}</div>`:''}</div></div>
+            <div class="sv-visit-time">${e.time}</div>
+          </div>
+          <div class="sv-visit-body"><span class="ptag ${e.platform}">${PLATS[e.platform]?.f}</span> <span class="sv-visit-title">${e.title}</span> <span class="stag ${e.status}">${STAT[e.status]}</span></div>
+          ${e.memo?`<div class="iv-card-memo">📝 ${e.memo}</div>`:''}
+          ${e.uploadUrl?`<div class="sv-upload-link">🔗 <a href="${e.uploadUrl}" target="_blank" style="color:var(--ac);text-decoration:none">${e.uploadUrl}</a></div>`:''}
+        </div>`;
+      });
+      h+=`</div>`;
+      // Remove today events from the remaining list if showing upcoming
+      if(svFilterMode==='upcoming') evs=evs.filter(e=>e.date!==t);
+    }
+  }
+
+  // Remaining events grouped by date
+  let lastDate='';
+  evs.forEach(e=>{
+    if(svFilterMode==='today'&&e.date===t)return; // Already shown in banner
+    if(e.date!==lastDate){
+      if(lastDate)h+=`</div>`;
+      const d=new Date(e.date);
+      const dd=dday(e.date);
+      const isToday=e.date===t;
+      h+=`<div class="sv-date-group"><div class="sv-date-label">${d.getMonth()+1}/${d.getDate()} (${DN[d.getDay()]}) <span class="sv-dday ${ddayClass(dd)}">${ddayText(dd)}</span></div>`;
+      lastDate=e.date;
+    }
+    const inf=influencers.find(x=>x.handle===e.influencer);
+    h+=`<div class="sv-visit-card">
+      <div class="sv-visit-top">
+        <div class="sv-visit-inf"><div class="sv-visit-avi">📸</div><div><div class="sv-visit-name">${inf?inf.name:e.influencer||'미배정'}</div>${e.influencer?`<div class="sv-visit-handle">${e.influencer}</div>`:''}</div></div>
+        <div style="display:flex;align-items:center;gap:8px"><span class="stag ${e.status}">${STAT[e.status]}</span><div class="sv-visit-time">${e.time}</div></div>
+      </div>
+      <div class="sv-visit-body"><span class="ptag ${e.platform}">${PLATS[e.platform]?.f}</span> <span class="sv-visit-title">${e.title}</span> <span style="font-size:11px;color:var(--t2)">💰 ${fmt(e.cost||0)}원</span></div>
+      ${e.memo?`<div class="iv-card-memo">📝 ${e.memo}</div>`:''}
+      ${e.uploadUrl?`<div class="sv-upload-link">🔗 <a href="${e.uploadUrl}" target="_blank" style="color:var(--ac);text-decoration:none">${e.uploadUrl}</a></div>`:''}
+    </div>`;
+  });
+  if(lastDate)h+=`</div>`;
+
+  document.getElementById('svBody').innerHTML=h;
+}
+
+// ============ INFLUENCER VIEW (릴서 전용) ============
+function checkInfluencerMode(){
+  const p=new URLSearchParams(location.search).get('inf');
+  if(!p)return false;
+  ivHandle=p.startsWith('@')?p:'@'+p;
+  isInfView=true;
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('infView').classList.add('active');
+  renderInfView();
+  return true;
+}
+
+function renderInfView(){
+  const inf=influencers.find(x=>x.handle===ivHandle);
+  const t=td();
+  const myEvs=data.filter(e=>e.influencer===ivHandle);
+  const upcoming=myEvs.filter(e=>e.date>=t&&e.status!=='done'&&e.status!=='cancelled');
+  const done=myEvs.filter(e=>e.status==='done');
+  const totalCost=myEvs.reduce((a,e)=>a+(e.cost||0),0);
+
+  document.getElementById('ivName').textContent=inf?inf.name:ivHandle;
+  document.getElementById('ivHandle').textContent=ivHandle;
+  document.getElementById('ivMeta').textContent=inf?`${inf.category} · 팔로워 ${fmt(inf.followers)}`:'';
+
+  document.getElementById('ivStats').innerHTML=`
+    <div class="iv-stat"><div class="iv-stat-n">${myEvs.length}</div><div class="iv-stat-l">전체</div></div>
+    <div class="iv-stat"><div class="iv-stat-n" style="color:var(--wn)">${upcoming.length}</div><div class="iv-stat-l">예정</div></div>
+    <div class="iv-stat"><div class="iv-stat-n" style="color:var(--ok)">${done.length}</div><div class="iv-stat-l">완료</div></div>
+    <div class="iv-stat"><div class="iv-stat-n" style="font-size:13px">${fmt(totalCost)}</div><div class="iv-stat-l">총 금액(원)</div></div>`;
+
+  renderIvList();
+}
+
+function ivFilter(mode,el){
+  ivFilterMode=mode;
+  document.querySelectorAll('.iv-tab').forEach(t=>t.classList.remove('on'));
+  if(el)el.classList.add('on');
+  renderIvList();
+}
+
+function renderIvList(){
+  const t=td(),tmrw=tmrwStr();
+  let evs=data.filter(e=>e.influencer===ivHandle);
+
+  // Earnings tab
+  if(ivFilterMode==='earnings'){
+    const byMonth={};
+    evs.forEach(e=>{const m=e.date.slice(0,7);if(!byMonth[m])byMonth[m]={count:0,cost:0,done:0};byMonth[m].count++;byMonth[m].cost+=(e.cost||0);if(e.status==='done')byMonth[m].done++});
+    const totalAll=evs.reduce((a,e)=>a+(e.cost||0),0);
+    const doneAll=evs.filter(e=>e.status==='done');
+    const doneCost=doneAll.reduce((a,e)=>a+(e.cost||0),0);
+    let h=`<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:16px;margin-bottom:12px">
+      <div style="font-size:12px;color:var(--t2);margin-bottom:8px">정산 요약</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="background:var(--bg3);padding:10px;border-radius:8px;text-align:center"><div style="font-family:'Outfit';font-size:18px;font-weight:700;color:var(--ok)">${fmt(doneCost)}원</div><div style="font-size:9px;color:var(--t3);margin-top:2px">완료 확정</div></div>
+        <div style="background:var(--bg3);padding:10px;border-radius:8px;text-align:center"><div style="font-family:'Outfit';font-size:18px;font-weight:700;color:var(--wn)">${fmt(totalAll-doneCost)}원</div><div style="font-size:9px;color:var(--t3);margin-top:2px">예정 금액</div></div>
+      </div>
+    </div>`;
+    const months=Object.keys(byMonth).sort().reverse();
+    months.forEach(m=>{
+      const d=byMonth[m];
+      h+=`<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+        <div><div style="font-size:13px;font-weight:600">${m.replace('-','년 ')}월</div><div style="font-size:10px;color:var(--t2);margin-top:2px">${d.count}건 (완료 ${d.done}건)</div></div>
+        <div style="font-family:'Outfit';font-size:16px;font-weight:700;color:var(--ac)">${fmt(d.cost)}원</div>
+      </div>`;
+    });
+    document.getElementById('ivBody').innerHTML=h;
+    return;
+  }
+
+  if(ivFilterMode==='upcoming') evs=evs.filter(e=>e.date>=t&&e.status!=='done'&&e.status!=='cancelled');
+  else if(ivFilterMode==='done') evs=evs.filter(e=>e.status==='done');
+
+  evs.sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time));
+
+  if(!evs.length){
+    document.getElementById('ivBody').innerHTML=`<div class="iv-empty"><div class="eico">📭</div><p>${ivFilterMode==='done'?'완료된 스케줄이 없습니다.':'예정된 스케줄이 없습니다.'}</p></div>`;
+    return;
+  }
+
+  let h='';
+
+  // Alert banners for upcoming tab
+  if(ivFilterMode==='upcoming'||ivFilterMode==='all'){
+    const todayEvs=evs.filter(e=>e.date===t&&e.status!=='done'&&e.status!=='cancelled');
+    const tmrwEvs=evs.filter(e=>e.date===tmrw&&e.status!=='done'&&e.status!=='cancelled');
+    const overdueEvs=evs.filter(e=>e.date<t&&e.status!=='done'&&e.status!=='cancelled');
+
+    if(overdueEvs.length) h+=`<div class="iv-alert urgent"><span class="alert-ico">🚨</span><span><b>${overdueEvs.length}건</b> 지연 중! 확인해주세요.</span></div>`;
+    if(todayEvs.length) h+=`<div class="iv-alert today"><span class="alert-ico">📸</span><span>오늘 촬영 <b>${todayEvs.length}건</b> 있습니다!</span></div>`;
+    if(tmrwEvs.length) h+=`<div class="iv-alert tomorrow"><span class="alert-ico">📅</span><span>내일 촬영 <b>${tmrwEvs.length}건</b> 예정</span></div>`;
+  }
+
+  let lastDate='';
+  evs.forEach(e=>{
+    if(e.date!==lastDate){
+      if(lastDate)h+=`</div>`;
+      const d=new Date(e.date);const dd=dday(e.date);const isToday=e.date===t;
+      h+=`<div class="iv-date-group"><div class="iv-date-label">${d.getMonth()+1}/${d.getDate()} (${DN[d.getDay()]})${isToday?' <span class="iv-today">TODAY</span>':''} <span class="iv-dday ${ddayClass(dd)}">${ddayText(dd)}</span></div>`;
+      lastDate=e.date;
+    }
+    const store=STORES[e.store];
+    const isToday=e.date===t;
+    const statusBtns=e.status==='done'
+      ?`<button class="iv-btn done" disabled>✅ 완료</button>`
+      :e.status==='cancelled'
+      ?`<button class="iv-btn" disabled style="opacity:.5">취소됨</button>`
+      :`<button class="iv-btn${e.status==='scheduled'?' active':''}" onclick="ivSetStatus(${e.id},'scheduled')">예정</button>
+       <button class="iv-btn${e.status==='progress'?' warn':''}" onclick="ivSetStatus(${e.id},'progress')">촬영중</button>
+       <button class="iv-btn${e.status==='review'?' active':''}" onclick="ivSetStatus(${e.id},'review')">검토중</button>
+       <button class="iv-btn" onclick="ivSetStatus(${e.id},'done')" style="border-color:var(--ok);color:var(--ok)">완료</button>`;
+
+    h+=`<div class="iv-card${isToday?' highlight':''}">
+      <div class="iv-card-top">
+        <div class="iv-card-store"><span class="st-dot" style="background:${store?.color||'#888'}"></span>${store?.name||e.store}</div>
+        <div class="iv-card-time">${e.time}</div>
+      </div>
+      <div class="iv-card-title">${e.title}</div>
+      <div class="iv-card-plat"><span class="ptag ${e.platform}">${PLATS[e.platform]?.f||e.platform}</span></div>
+      <div class="iv-card-info">
+        <span>💰 ${fmt(e.cost||0)}원</span>
+        ${e.views?`<span>👀 ${fmt(e.views)}</span>`:''}
+        ${e.likes?`<span>❤️ ${fmt(e.likes)}</span>`:''}
+      </div>
+      ${e.memo?`<div class="iv-card-memo">📝 ${e.memo}</div>`:''}
+      <div class="iv-card-actions">${statusBtns}</div>
+      ${e.status==='done'&&e.uploadUrl?`<div class="iv-upload-saved">🔗 ${e.uploadUrl}</div>`:''}
+      ${e.status==='done'&&!e.uploadUrl?`<div class="iv-upload-area"><label>📎 업로드 링크 등록</label><input class="iv-upload-input" id="upl_${e.id}" placeholder="https://www.instagram.com/reel/..." value="${e.uploadUrl||''}"><button class="iv-upload-btn" onclick="ivSaveUpload(${e.id})">등록</button></div>`:''}
+    </div>`;
+  });
+  if(lastDate)h+=`</div>`;
+  document.getElementById('ivBody').innerHTML=h;
+}
+
+function ivSetStatus(id,status){
+  if(status==='done'&&!confirm('완료 처리하시겠습니까?'))return;
+  const ev=data.find(x=>x.id===id);
+  if(ev){ev.status=status;save();renderIvList();renderInfView()}
+}
+
+function ivSaveUpload(id){
+  const input=document.getElementById('upl_'+id);
+  if(!input)return;
+  const url=input.value.trim();
+  if(!url){alert('업로드 링크를 입력해주세요.');return}
+  const ev=data.find(x=>x.id===id);
+  if(ev){ev.uploadUrl=url;save();renderIvList();alert('업로드 링크가 등록되었습니다!')}
+}
+
+// ============ INIT ============
+loadStores();
+load();
+// Set current month from today
+const _now=new Date();curY=_now.getFullYear();curM=_now.getMonth();rptY=curY;rptM=curM;bgtY=curY;bgtM=curM;
+
+if(checkInfluencerMode()){
+  // Influencer view active
+}else if(checkStoreMode()){
+  // Store view active
+}else{
+  checkAuth();
+  renderST();
+  renderCal();
+  renderDash();
+}
+</script>
+</body>
+</html>
