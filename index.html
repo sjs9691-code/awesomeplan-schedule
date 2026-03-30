@@ -732,10 +732,19 @@ input,select,textarea{font-family:inherit}
     <div class="f"><label>이름/닉네임</label><input class="fi" id="iName" placeholder="예: 먹방의달인"></div>
     <div class="f"><label>핸들</label><input class="fi" id="iHandle" placeholder="예: @foodie_kim"></div>
     <div class="f"><label>카테고리</label><select class="fi" id="iCat"><option>먹방/맛집</option><option>라이프스타일</option><option>뷰티</option><option>여행</option><option>일상브이로그</option><option>기타</option></select></div>
-    <div class="f"><label>주요 플랫폼 (쉼표 구분)</label><input class="fi" id="iPlats" placeholder="instagram, tiktok, youtube"></div>
+    <div class="f"><label>채널 / 플랫폼</label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;padding:4px 10px;border:1px solid var(--bd);border-radius:6px;transition:all .15s"><input type="checkbox" class="i-plat" value="instagram" checked> 📸 Instagram</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;padding:4px 10px;border:1px solid var(--bd);border-radius:6px;transition:all .15s"><input type="checkbox" class="i-plat" value="youtube" checked> ▶️ YouTube</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;padding:4px 10px;border:1px solid var(--bd);border-radius:6px;transition:all .15s"><input type="checkbox" class="i-plat" value="tiktok" checked> 🎵 TikTok</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;padding:4px 10px;border:1px solid var(--bd);border-radius:6px;transition:all .15s"><input type="checkbox" class="i-plat" value="naver"> 📝 Naver</label>
+      </div>
+    </div>
+    <div class="f"><label>Instagram URL</label><div style="display:flex;gap:6px"><input class="fi" id="iUrlInsta" placeholder="https://www.instagram.com/handle" style="flex:1" oninput="autoCheckPlat(this,'instagram')"><button type="button" class="bp" style="flex:none;width:50px;padding:8px;font-size:11px;background:var(--ig)" onclick="openPlatUrl('iUrlInsta','instagram')">열기</button></div></div>
+    <div class="f"><label>YouTube URL</label><div style="display:flex;gap:6px"><input class="fi" id="iUrlYt" placeholder="https://www.youtube.com/@channel" style="flex:1" oninput="autoCheckPlat(this,'youtube')"><button type="button" class="bp" style="flex:none;width:50px;padding:8px;font-size:11px;background:var(--dg)" onclick="openPlatUrl('iUrlYt','youtube')">열기</button></div></div>
+    <div class="f"><label>TikTok URL</label><div style="display:flex;gap:6px"><input class="fi" id="iUrlTt" placeholder="https://www.tiktok.com/@handle" style="flex:1" oninput="autoCheckPlat(this,'tiktok')"><button type="button" class="bp" style="flex:none;width:50px;padding:8px;font-size:11px;background:#111" onclick="openPlatUrl('iUrlTt','tiktok')">열기</button></div></div>
     <div class="f-row"><div class="f"><label>팔로워 수</label><input class="fi" id="iFollowers" type="number" placeholder="0"></div><div class="f"><label>평균 조회수</label><input class="fi" id="iAvgViews" type="number" placeholder="0"></div></div>
     <div class="f"><label>1건 단가 (원)</label><input class="fi" id="iRate" type="number" placeholder="0"></div>
-    <div class="f"><label>인스타 프로필 URL</label><div style="display:flex;gap:6px"><input class="fi" id="iProfileUrl" placeholder="https://www.instagram.com/handle" style="flex:1"><button type="button" class="bp" style="flex:none;width:60px;padding:8px;font-size:11px" onclick="const v=document.getElementById('iProfileUrl').value;if(v)window.open(v,'_blank');else{const h=document.getElementById('iHandle').value.replace('@','');if(h)window.open('https://www.instagram.com/'+h,'_blank');else alert('핸들을 먼저 입력하세요')}">확인</button></div></div>
     <div class="f"><label>연락처/메모</label><textarea class="fi" id="iMemo" rows="2" placeholder="카톡ID, 연락처, 특이사항 등"></textarea></div>
   </div>
   <div class="modal-a"><button class="bs" onclick="closeInfAdd()">취소</button><button class="bp" onclick="saveInf()">저장</button></div></div>
@@ -1286,8 +1295,10 @@ function renderInfs(){
 }
 function openInfAdd(){
   infEditId=null;document.getElementById('infAddTi').textContent='인플루언서 추가';
-  ['iName','iHandle','iPlats','iMemo','iProfileUrl'].forEach(x=>document.getElementById(x).value='');
+  ['iName','iHandle','iMemo','iUrlInsta','iUrlYt','iUrlTt'].forEach(x=>document.getElementById(x).value='');
   ['iFollowers','iAvgViews','iRate'].forEach(x=>document.getElementById(x).value='');
+  // Default: instagram, youtube, tiktok checked
+  document.querySelectorAll('.i-plat').forEach(cb=>{cb.checked=['instagram','youtube','tiktok'].includes(cb.value)});
   document.getElementById('infOv').classList.add('show');
 }
 function closeInfAdd(){document.getElementById('infOv').classList.remove('show')}
@@ -1296,26 +1307,45 @@ function editInf(id){
   infEditId=id;document.getElementById('infAddTi').textContent='인플루언서 수정';
   document.getElementById('iName').value=inf.name;document.getElementById('iHandle').value=inf.handle;
   document.getElementById('iCat').value=inf.category;
-  document.getElementById('iPlats').value=(inf.platforms||[]).join(', ');
+  // Set platform checkboxes
+  document.querySelectorAll('.i-plat').forEach(cb=>{cb.checked=(inf.platforms||[]).includes(cb.value)});
+  // Set URLs
+  document.getElementById('iUrlInsta').value=inf.urlInsta||inf.profileUrl||'';
+  document.getElementById('iUrlYt').value=inf.urlYt||'';
+  document.getElementById('iUrlTt').value=inf.urlTt||'';
   document.getElementById('iFollowers').value=inf.followers;document.getElementById('iAvgViews').value=inf.avgViews;
   document.getElementById('iRate').value=inf.rate;document.getElementById('iMemo').value=inf.memo||'';
-  document.getElementById('iProfileUrl').value=inf.profileUrl||'';
   document.getElementById('infOv').classList.add('show');
 }
 function saveInf(){
   const obj={
     name:document.getElementById('iName').value||'이름없음',handle:document.getElementById('iHandle').value||'@unknown',
     category:document.getElementById('iCat').value,
-    platforms:document.getElementById('iPlats').value.split(',').map(x=>x.trim()).filter(Boolean),
+    platforms:[...document.querySelectorAll('.i-plat:checked')].map(cb=>cb.value),
+    urlInsta:document.getElementById('iUrlInsta').value.trim(),
+    urlYt:document.getElementById('iUrlYt').value.trim(),
+    urlTt:document.getElementById('iUrlTt').value.trim(),
+    profileUrl:document.getElementById('iUrlInsta').value.trim(),
     followers:parseInt(document.getElementById('iFollowers').value)||0,
     avgViews:parseInt(document.getElementById('iAvgViews').value)||0,
     rate:parseInt(document.getElementById('iRate').value)||0,
-    memo:document.getElementById('iMemo').value,
-    profileUrl:document.getElementById('iProfileUrl').value.trim()
+    memo:document.getElementById('iMemo').value
   };
   if(infEditId){const i=influencers.findIndex(x=>x.id===infEditId);if(i>=0)influencers[i]={...influencers[i],...obj}}
   else{obj.id=infc++;influencers.push(obj)}
   saveInfs();closeInfAdd();renderInfs();
+}
+function autoCheckPlat(input,plat){
+  const cb=document.querySelector(`.i-plat[value="${plat}"]`);
+  if(cb)cb.checked=!!input.value.trim();
+}
+function openPlatUrl(inputId,plat){
+  const v=document.getElementById(inputId).value.trim();
+  if(v){window.open(v,'_blank');return}
+  const h=document.getElementById('iHandle').value.replace('@','');
+  if(!h){alert('핸들을 먼저 입력하세요');return}
+  const urls={instagram:'https://www.instagram.com/'+h,youtube:'https://www.youtube.com/@'+h,tiktok:'https://www.tiktok.com/@'+h};
+  window.open(urls[plat]||'','_blank');
 }
 function exportInfCSV(){
   const rows=[['이름','핸들','카테고리','플랫폼','팔로워','평균조회','단가','메모']];
